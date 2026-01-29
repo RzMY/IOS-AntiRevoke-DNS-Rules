@@ -1,0 +1,35 @@
+{
+  "timestamp": "2026-01-29T04:53:22.375156",
+  "total_domains": 18,
+  "sources_processed": 2,
+  "generated_files": {
+    "Quantumult X": "output/RevokeGuard_QuantumultX.txt",
+    "Surge": "output/RevokeGuard_Surge.txt",
+    "Loon": "output/RevokeGuard_Loon.txt",
+    "Shadowrocket": "output/RevokeGuard_Shadowrocket.txt",
+    "Hosts": "output/RevokeGuard_hosts.txt",
+    "Domain List": "output/domains.txt"
+  },
+  "source_details": {
+    "khoindvn": {
+      "domains_count": 10,
+      "domains_sample": [
+        "certs.apple.com",
+        "crl.apple.com",
+        "crl3.digicert.com",
+        "crl4.digicert.com",
+        "ocsp.apple.com"
+      ]
+    },
+    "applejr": {
+      "domains_count": 13,
+      "domains_sample": [
+        "ocsp.apple.com",
+        "ocsp2.apple.com",
+        "mesu.apple.com",
+        "valid.apple.com",
+        "crl.apple.com"
+      ]
+    }
+  }
+}
