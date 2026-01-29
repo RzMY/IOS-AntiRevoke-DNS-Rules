@@ -207,8 +207,8 @@ class CryptoHandler:
                         'PayloadUUID': str(uuid.uuid4()),
                         'PayloadDisplayName': 'DNS Settings',
                         'DNSSettings': {
-                            'DNSProtocol': 'https',
-                            'ServerAddresses': ['https://reject.rzmy.dpdns.org/dns-query'],
+                            'DNSProtocol': 'HTTPS',
+                            'ServerURL': 'https://reject.rzmy.dpdns.org/dns-query',
                             'SupplementalMatchDomains': sorted(list(set(domains)))
                         }
                     }
