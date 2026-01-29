@@ -138,7 +138,7 @@ class AntiRevokeOrchestrator:
         
         return merged_domains
 
-    def generate_profile(self, domains: List[str]) -> Optional[str]:
+    def generate_profile(self, domains: List[str], updated_utc: str, domain_count: int) -> Optional[str]:
         """
         Step 4A: Generate signed .mobileconfig profile.
 
@@ -153,7 +153,12 @@ class AntiRevokeOrchestrator:
         logger.info("=" * 60)
 
         # Create unsigned plist
-        plist_file = self.crypto.create_profile(domains)
+        plist_file = self.crypto.create_profile(
+            domains,
+            updated_utc=updated_utc,
+            domain_count=domain_count,
+            backend_host='reject.rzmy.dpdns.org'
+        )
         if not plist_file:
             logger.error("Failed to create profile plist")
             return None
@@ -179,7 +184,7 @@ class AntiRevokeOrchestrator:
         logger.info(f"Saved unsigned plist: {unsigned_path}")
         return str(unsigned_path)
 
-    def generate_rules(self, domains: List[str]) -> Dict[str, str]:
+    def generate_rules(self, domains: List[str], author: str, updated_utc: str, domain_count: int) -> Dict[str, str]:
         """
         Step 4B: Generate filter rules for proxy tools.
 
@@ -193,7 +198,7 @@ class AntiRevokeOrchestrator:
         logger.info("STEP 4B: Generating filter rules")
         logger.info("=" * 60)
 
-        generated_files = self.rule_generator.generate_all_rules(domains)
+        generated_files = self.rule_generator.generate_all_rules(domains, author, updated_utc, domain_count)
         
         for tool_name, file_path in generated_files.items():
             logger.info(f"Generated {tool_name} rules: {file_path}")
@@ -212,7 +217,7 @@ class AntiRevokeOrchestrator:
             Path to metadata file
         """
         metadata = {
-            'timestamp': datetime.now().isoformat(),
+            'timestamp': datetime.utcnow().isoformat() + 'Z',
             'total_domains': len(set(domains)),
             'sources_processed': len(self.processing_results),
             'generated_files': generated_files,
@@ -254,12 +259,15 @@ class AntiRevokeOrchestrator:
 
             # Step 3: Merge
             merged_domains = self.merge_domains()
+            domain_count = len(merged_domains)
+            updated_utc = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+            author = 'RzMY'
 
             # Step 4A: Generate Profile
-            profile_path = self.generate_profile(merged_domains)
+            profile_path = self.generate_profile(merged_domains, updated_utc, domain_count)
 
             # Step 4B: Generate Rules
-            generated_files = self.generate_rules(merged_domains)
+            generated_files = self.generate_rules(merged_domains, author, updated_utc, domain_count)
 
             # Generate metadata
             metadata_file = self.generate_metadata(merged_domains, generated_files)

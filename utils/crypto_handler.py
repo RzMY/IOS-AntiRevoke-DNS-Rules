@@ -151,13 +151,23 @@ class CryptoHandler:
             logger.error(f"Domain extraction error: {e}")
             return []
 
-    def create_profile(self, domains: List[str], output_file: str = None) -> Optional[str]:
+    def create_profile(
+        self,
+        domains: List[str],
+        output_file: str = None,
+        updated_utc: str = None,
+        domain_count: int = None,
+        backend_host: str = 'reject.rzmy.dpdns.org'
+    ) -> Optional[str]:
         """
         Create a new .mobileconfig plist file with the given domains.
 
         Args:
             domains: List of domains to include
             output_file: Output file path (optional)
+            updated_utc: Timestamp in UTC (YYYY-MM-DD HH:MM:SS UTC)
+            domain_count: Total number of merged domains
+            backend_host: Backend host for description metadata
 
         Returns:
             Path to created plist file or None if creation fails
@@ -168,15 +178,23 @@ class CryptoHandler:
             temp_file.close()
 
         try:
+            domain_total = domain_count if domain_count is not None else len(set(domains))
+            updated_value = updated_utc or datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+            display_date = updated_value.split(' ')[0]
+
             # Create base mobileconfig structure
             profile = {
                 'PayloadVersion': 1,
                 'PayloadType': 'Configuration',
                 'PayloadIdentifier': f'com.revokeGuard.{uuid.uuid4()}',
                 'PayloadUUID': str(uuid.uuid4()),
-                'PayloadDisplayName': 'RevokeGuard Auto-Sync',
-                'PayloadDescription': 'iOS Anti-Revoke & Anti-Blacklist Configuration',
-                'PayloadOrganization': 'RevokeGuard',
+                'PayloadDisplayName': f'RevokeGuard {display_date}',
+                'PayloadDescription': (
+                    f'Auto-generated on {updated_value}. '
+                    f'Blocked Domains: {domain_total}. '
+                    f'Backend: {backend_host}.'
+                ),
+                'PayloadOrganization': 'iOS-AntiRevoke-DNS-Rules',
                 'PayloadRemovalDisallowed': False,
                 'ConsentText': {
                     'default': 'This profile provides protection against revocation and blacklisting.'
