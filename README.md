@@ -45,7 +45,7 @@
 
 <div align="center">
 
-<a href="https://raw.githubusercontent.com/RzMY/IOS-AntiRevoke-DNS-Rules/main/output/RevokeGuard_Auto-Sync.mobileconfig">
+<a href="https://reject.rzmy.dpdns.org/download">
   <img src="https://img.shields.io/badge/📲_Install_Profile-007AFF?style=for-the-badge&logo=apple&logoColor=white" alt="Install iOS Profile">
 </a>
 
@@ -60,7 +60,7 @@
 
 | Platform<br/>平台 | Format<br/>格式 | Link<br/>链接 | Description<br/>说明 |
 |:---|:---|:---|:---|
-| **🍎 iOS Native** | `.mobileconfig` (Signed) | [📲 Install Profile](https://raw.githubusercontent.com/RzMY/IOS-AntiRevoke-DNS-Rules/main/output/RevokeGuard_Auto-Sync.mobileconfig) | Native DNS profile<br/>原生 DNS 配置文件 |
+| **🍎 iOS Native** | `.mobileconfig` (Signed) | [📲 Install Profile](https://reject.rzmy.dpdns.org/download) | Native DNS profile<br/>原生 DNS 配置文件 |
 | **Ⓠ Quantumult X** | Rule Snippet | [📄 View Rules](https://raw.githubusercontent.com/RzMY/IOS-AntiRevoke-DNS-Rules/main/output/RevokeGuard_QuantumultX.txt) | `host, domain, reject`<br/>主机规则格式 |
 | **🦁 Loon** | Rule Plugin | [📄 View Rules](https://raw.githubusercontent.com/RzMY/IOS-AntiRevoke-DNS-Rules/main/output/RevokeGuard_Loon.txt) | `DOMAIN,domain,REJECT`<br/>域名规则格式 |
 | **🌊 Surge** | Domain Set | [📄 View Rules](https://raw.githubusercontent.com/RzMY/IOS-AntiRevoke-DNS-Rules/main/output/RevokeGuard_Surge.txt) | `DOMAIN,domain,REJECT`<br/>域名规则格式 |
