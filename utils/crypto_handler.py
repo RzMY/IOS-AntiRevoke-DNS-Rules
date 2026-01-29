@@ -190,7 +190,7 @@ class CryptoHandler:
                         'PayloadDisplayName': 'DNS Settings',
                         'DNSSettings': {
                             'DNSProtocol': 'https',
-                            'ServerAddresses': ['1.1.1.1', '8.8.8.8'],
+                            'ServerAddresses': ['https://reject.rzmy.dpdns.org/dns-query'],
                             'SupplementalMatchDomains': sorted(list(set(domains)))
                         }
                     }
