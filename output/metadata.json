@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-02-16T01:08:05.865731Z",
-  "total_domains": 18,
+  "timestamp": "2026-02-17T01:06:56.012552Z",
+  "total_domains": 19,
   "sources_processed": 2,
   "generated_files": {
     "Quantumult X": "output/RevokeGuard_QuantumultX.txt",
@@ -12,7 +12,7 @@
   },
   "source_details": {
     "khoindvn": {
-      "domains_count": 10,
+      "domains_count": 12,
       "domains_sample": [
         "certs.apple.com",
         "crl.apple.com",

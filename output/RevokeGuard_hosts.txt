@@ -1,10 +1,11 @@
 # Project: iOS-AntiRevoke-DNS-Rules
 # Author: RzMY
-# Updated: 2026-02-16 01:08:05 UTC
-# Domain Count: 18
+# Updated: 2026-02-17 01:06:56 UTC
+# Domain Count: 19
 # License: MIT License
 # Format: IP domain
 
+0.0.0.0 analytics.apple.com
 0.0.0.0 appattest.apple.com
 0.0.0.0 axm-app.apple.com
 0.0.0.0 certs.apple.com
