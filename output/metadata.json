@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-02-21T01:02:59.267202Z",
-  "total_domains": 19,
+  "timestamp": "2026-02-22T01:07:19.272736Z",
+  "total_domains": 20,
   "sources_processed": 2,
   "generated_files": {
     "Quantumult X": "output/RevokeGuard_QuantumultX.txt",

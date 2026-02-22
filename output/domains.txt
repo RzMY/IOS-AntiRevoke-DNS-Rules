@@ -1,7 +1,7 @@
 # Project: iOS-AntiRevoke-DNS-Rules
 # Author: RzMY
-# Updated: 2026-02-21 01:02:59 UTC
-# Domain Count: 19
+# Updated: 2026-02-22 01:07:19 UTC
+# Domain Count: 20
 # License: MIT License
 
 analytics.apple.com
@@ -15,6 +15,7 @@ crl3.digicert.com
 crl4.digicert.com
 gdmf.apple.com
 guzzoni-apple-com.v.aaplimg.com
+khoindvn.com
 mesu.apple.com
 ocsp.apple.com
 ocsp.digicert.cn
