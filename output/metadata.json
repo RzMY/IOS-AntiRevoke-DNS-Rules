@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-03-25T01:09:03.581380Z",
-  "total_domains": 20,
-  "sources_processed": 2,
+  "timestamp": "2026-03-26T01:14:47.676504Z",
+  "total_domains": 13,
+  "sources_processed": 1,
   "generated_files": {
     "Quantumult X": "output/RevokeGuard_QuantumultX.txt",
     "Surge": "output/RevokeGuard_Surge.txt",
@@ -11,16 +11,6 @@
     "Domain List": "output/domains.txt"
   },
   "source_details": {
-    "khoindvn": {
-      "domains_count": 12,
-      "domains_sample": [
-        "certs.apple.com",
-        "crl.apple.com",
-        "crl3.digicert.com",
-        "crl4.digicert.com",
-        "ocsp.apple.com"
-      ]
-    },
     "applejr": {
       "domains_count": 13,
       "domains_sample": [
