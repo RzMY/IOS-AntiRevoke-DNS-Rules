@@ -294,7 +294,7 @@ def main():
     sources = [
         {
             'url': 'https://khoindvn.io.vn/',
-            'xpath': '/html/body/main/section[2]/div[2]/div[1]/a',
+            'xpath': '/html/body/main/div[1]/div/a[5]',
             'name': 'khoindvn'
         },
         {
