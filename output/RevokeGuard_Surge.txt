@@ -1,6 +1,6 @@
 # Project: iOS-AntiRevoke-DNS-Rules
 # Author: RzMY
-# Updated: 2026-06-24 02:04:25 UTC
+# Updated: 2026-06-25 02:05:04 UTC
 # Domain Count: 20
 # License: MIT License
 # Format: DOMAIN,domain,action
