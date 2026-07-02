@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-07-01T02:11:33.276857Z",
-  "total_domains": 20,
+  "timestamp": "2026-07-02T02:03:58.410892Z",
+  "total_domains": 12,
   "sources_processed": 2,
   "generated_files": {
     "Quantumult X": "output/RevokeGuard_QuantumultX.txt",
@@ -22,13 +22,13 @@
       ]
     },
     "applejr": {
-      "domains_count": 13,
+      "domains_count": 10,
       "domains_sample": [
+        "certs.apple.com",
+        "crl.apple.com",
         "ocsp.apple.com",
         "ocsp2.apple.com",
-        "mesu.apple.com",
-        "valid.apple.com",
-        "crl.apple.com"
+        "valid.apple.com"
       ]
     }
   }
