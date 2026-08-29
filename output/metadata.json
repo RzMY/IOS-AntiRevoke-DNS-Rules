@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "timestamp": "2026-08-29T16:10:26.403776Z",
+  "timestamp": "2026-08-29T16:45:38.478545Z",
   "apple_source": {
     "url": "https://support.apple.com/zh-cn/101555",
     "candidate_domains": 133
@@ -260,23 +260,23 @@
   },
   "generated_files": {
     "normal": {
-      "Quantumult X": "output\\RevokeGuard_QuantumultX.txt",
-      "Surge": "output\\RevokeGuard_Surge.txt",
-      "Loon": "output\\RevokeGuard_Loon.txt",
-      "Shadowrocket": "output\\RevokeGuard_Shadowrocket.txt",
-      "Hosts": "output\\RevokeGuard_hosts.txt",
-      "Domain List": "output\\domains.txt",
-      "iOS Profile": "output\\RevokeGuard_Auto-Sync.mobileconfig"
+      "Quantumult X": "output/RevokeGuard_QuantumultX.txt",
+      "Surge": "output/RevokeGuard_Surge.txt",
+      "Loon": "output/RevokeGuard_Loon.txt",
+      "Shadowrocket": "output/RevokeGuard_Shadowrocket.txt",
+      "Hosts": "output/RevokeGuard_hosts.txt",
+      "Domain List": "output/domains.txt",
+      "iOS Profile": "output/RevokeGuard_Auto-Sync.mobileconfig"
     },
     "enhanced": {
-      "Quantumult X": "output\\enhanced\\RevokeGuard_Enhanced_QuantumultX.txt",
-      "Surge": "output\\enhanced\\RevokeGuard_Enhanced_Surge.txt",
-      "Loon": "output\\enhanced\\RevokeGuard_Enhanced_Loon.txt",
-      "Shadowrocket": "output\\enhanced\\RevokeGuard_Enhanced_Shadowrocket.txt",
-      "Hosts": "output\\enhanced\\RevokeGuard_Enhanced_hosts.txt",
-      "Domain List": "output\\enhanced\\enhanced-domains.txt",
-      "iOS Profile": "output\\enhanced\\RevokeGuard_Enhanced.mobileconfig",
-      "Metadata": "output\\enhanced\\metadata.json"
+      "Quantumult X": "output/enhanced/RevokeGuard_Enhanced_QuantumultX.txt",
+      "Surge": "output/enhanced/RevokeGuard_Enhanced_Surge.txt",
+      "Loon": "output/enhanced/RevokeGuard_Enhanced_Loon.txt",
+      "Shadowrocket": "output/enhanced/RevokeGuard_Enhanced_Shadowrocket.txt",
+      "Hosts": "output/enhanced/RevokeGuard_Enhanced_hosts.txt",
+      "Domain List": "output/enhanced/enhanced-domains.txt",
+      "iOS Profile": "output/enhanced/RevokeGuard_Enhanced.mobileconfig",
+      "Metadata": "output/enhanced/metadata.json"
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "timestamp": "2026-08-29T16:10:26.403776Z",
+  "timestamp": "2026-08-29T16:45:38.478545Z",
   "dns_endpoint": {
     "source": "sideloading",
     "url": "https://novadns-ppq.novadev.vip/dns-query",
@@ -13,12 +13,12 @@
   "extra_domain_count": 1,
   "merged_profile_domain_count": 14,
   "generated_files": {
-    "Quantumult X": "output\\enhanced\\RevokeGuard_Enhanced_QuantumultX.txt",
-    "Surge": "output\\enhanced\\RevokeGuard_Enhanced_Surge.txt",
-    "Loon": "output\\enhanced\\RevokeGuard_Enhanced_Loon.txt",
-    "Shadowrocket": "output\\enhanced\\RevokeGuard_Enhanced_Shadowrocket.txt",
-    "Hosts": "output\\enhanced\\RevokeGuard_Enhanced_hosts.txt",
-    "Domain List": "output\\enhanced\\enhanced-domains.txt",
-    "iOS Profile": "output\\enhanced\\RevokeGuard_Enhanced.mobileconfig"
+    "Quantumult X": "output/enhanced/RevokeGuard_Enhanced_QuantumultX.txt",
+    "Surge": "output/enhanced/RevokeGuard_Enhanced_Surge.txt",
+    "Loon": "output/enhanced/RevokeGuard_Enhanced_Loon.txt",
+    "Shadowrocket": "output/enhanced/RevokeGuard_Enhanced_Shadowrocket.txt",
+    "Hosts": "output/enhanced/RevokeGuard_Enhanced_hosts.txt",
+    "Domain List": "output/enhanced/enhanced-domains.txt",
+    "iOS Profile": "output/enhanced/RevokeGuard_Enhanced.mobileconfig"
   }
 }
