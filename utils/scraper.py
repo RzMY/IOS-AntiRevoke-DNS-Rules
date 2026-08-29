@@ -1,181 +1,163 @@
-"""
-Scraper module for iOS Anti-Revoke profiles.
-Fetches .mobileconfig files from multiple sources using specified XPaths.
-"""
+"""HTTP scrapers for Apple host data and upstream DNS profiles."""
 
-import requests
-import tempfile
+from __future__ import annotations
+
 import logging
-from pathlib import Path
-from lxml import html
-from typing import List, Dict, Optional
+import re
+import time
+from typing import Dict, Iterable, List, Optional
 from urllib.parse import urljoin
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+import requests
+from lxml import html
+
 logger = logging.getLogger(__name__)
 
 
+class ScrapeError(RuntimeError):
+    """Raised when a required upstream resource cannot be retrieved or parsed."""
+
+
 class ProfileScraper:
-    """
-    Scrapes iOS .mobileconfig profiles from multiple sources.
-    """
+    """Download required mobileconfig profiles and Apple's official host list."""
 
-    def __init__(self, timeout: int = 10, max_retries: int = 3):
-        """
-        Initialize the scraper.
+    DOMAIN_PATTERN = re.compile(
+        r"(?:\*\.)?(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+"
+        r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?",
+        re.IGNORECASE,
+    )
 
-        Args:
-            timeout: Request timeout in seconds
-            max_retries: Maximum number of retry attempts
-        """
+    def __init__(self, timeout: int = 30, max_retries: int = 3):
         self.timeout = timeout
         self.max_retries = max_retries
         self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        })
+        self.session.headers.update(
+            {
+                "User-Agent": (
+                    "Mozilla/5.0 (compatible; "
+                    "IOS-AntiRevoke-DNS-Rules/2.0)"
+                )
+            }
+        )
+        self.download_urls: Dict[str, str] = {}
 
-    def _fetch_page(self, url: str) -> Optional[str]:
-        """
-        Fetch HTML content from a URL with retry logic.
-
-        Args:
-            url: Target URL
-
-        Returns:
-            HTML content or None if fetch fails
-        """
-        for attempt in range(self.max_retries):
+    def _request(self, url: str) -> requests.Response:
+        last_error: Optional[Exception] = None
+        for attempt in range(1, self.max_retries + 1):
             try:
-                logger.info(f"Fetching {url} (attempt {attempt + 1}/{self.max_retries})")
+                logger.info(
+                    "Fetching %s (attempt %s/%s)",
+                    url,
+                    attempt,
+                    self.max_retries,
+                )
                 response = self.session.get(url, timeout=self.timeout)
                 response.raise_for_status()
-                return response.text
-            except requests.RequestException as e:
-                logger.warning(f"Attempt {attempt + 1} failed: {e}")
-                if attempt == self.max_retries - 1:
-                    logger.error(f"Failed to fetch {url} after {self.max_retries} attempts")
-                    return None
-        return None
+                return response
+            except requests.RequestException as exc:
+                last_error = exc
+                logger.warning("Request failed for %s: %s", url, exc)
+                if attempt < self.max_retries:
+                    time.sleep(0.5 * (2 ** (attempt - 1)))
 
-    def _extract_download_link(self, html_content: str, xpath: str, base_url: str) -> Optional[str]:
-        """
-        Extract download link from HTML using XPath.
+        raise ScrapeError(
+            f"Failed to fetch {url} after {self.max_retries} attempts: "
+            f"{last_error}"
+        )
 
-        Args:
-            html_content: HTML content as string
-            xpath: XPath expression to find the link
-            base_url: Base URL for resolving relative links
+    def _fetch_page(self, url: str) -> bytes:
+        return self._request(url).content
 
-        Returns:
-            Absolute URL of the download link or None
-        """
+    @staticmethod
+    def _extract_download_link(
+        html_content: bytes,
+        xpath: str,
+        base_url: str,
+    ) -> str:
         try:
             tree = html.fromstring(html_content)
             elements = tree.xpath(xpath)
-            if elements:
-                link = elements[0].get('href')
-                if link:
-                    # Convert relative URLs to absolute
-                    return urljoin(base_url, link)
-            logger.warning(f"No element found for XPath: {xpath}")
-        except Exception as e:
-            logger.error(f"XPath parsing error: {e}")
-        return None
+        except (ValueError, TypeError) as exc:
+            raise ScrapeError(f"Invalid HTML or XPath for {base_url}: {exc}") from exc
 
-    def download_profile(self, url: str) -> Optional[bytes]:
-        """
-        Download a .mobileconfig file.
+        if not elements:
+            raise ScrapeError(f"XPath did not match any element at {base_url}: {xpath}")
 
-        Args:
-            url: Download URL
+        href = elements[0].get("href")
+        if not href:
+            raise ScrapeError(f"XPath target has no href at {base_url}: {xpath}")
 
-        Returns:
-            File content as bytes or None if download fails
-        """
-        for attempt in range(self.max_retries):
-            try:
-                logger.info(f"Downloading {url} (attempt {attempt + 1}/{self.max_retries})")
-                response = self.session.get(url, timeout=self.timeout)
-                response.raise_for_status()
-                return response.content
-            except requests.RequestException as e:
-                logger.warning(f"Download attempt {attempt + 1} failed: {e}")
-                if attempt == self.max_retries - 1:
-                    logger.error(f"Failed to download {url} after {self.max_retries} attempts")
-                    return None
-        return None
+        return urljoin(base_url, href)
 
-    def scrape_sources(self, sources: List[Dict[str, str]]) -> Dict[str, bytes]:
-        """
-        Scrape profiles from multiple sources.
+    def download_profile(self, url: str) -> bytes:
+        response = self._request(url)
+        content = response.content
+        content_type = response.headers.get("content-type", "").lower()
+        prefix = content.lstrip()[:64].lower()
 
-        Args:
-            sources: List of dicts with 'url' and 'xpath' keys
+        if not content:
+            raise ScrapeError(f"Downloaded profile is empty: {url}")
+        if "text/html" in content_type or prefix.startswith(b"<!doctype html"):
+            raise ScrapeError(f"Profile URL returned HTML instead of mobileconfig: {url}")
 
-        Returns:
-            Dictionary mapping source names to profile content
-        """
-        profiles = {}
+        return content
+
+    def scrape_sources(self, sources: Iterable[Dict[str, str]]) -> Dict[str, bytes]:
+        profiles: Dict[str, bytes] = {}
+        self.download_urls = {}
 
         for source in sources:
-            url = source.get('url')
-            xpath = source.get('xpath')
-            name = source.get('name', url)
+            name = source.get("name")
+            url = source.get("url")
+            xpath = source.get("xpath")
+            if not name or not url or not xpath:
+                raise ScrapeError("Every profile source requires name, url, and xpath")
 
-            if not url or not xpath:
-                logger.warning(f"Skipping source: missing url or xpath")
-                continue
-
-            # Fetch the page
-            html_content = self._fetch_page(url)
-            if not html_content:
-                continue
-
-            # Extract download link
-            download_url = self._extract_download_link(html_content, xpath, url)
-            if not download_url:
-                logger.warning(f"Could not extract download link from {url}")
-                continue
-
-            # Download the profile
-            profile_content = self.download_profile(download_url)
-            if profile_content:
-                profiles[name] = profile_content
-                logger.info(f"Successfully scraped profile from {name}")
-            else:
-                logger.warning(f"Failed to download profile from {name}")
+            page = self._fetch_page(url)
+            download_url = self._extract_download_link(page, xpath, url)
+            profiles[name] = self.download_profile(download_url)
+            self.download_urls[name] = download_url
+            logger.info("Downloaded required profile from %s", name)
 
         return profiles
 
-    def save_profiles(self, profiles: Dict[str, bytes], output_dir: str) -> List[str]:
-        """
-        Save downloaded profiles to disk.
+    @classmethod
+    def extract_apple_domains(cls, html_content: bytes) -> List[str]:
+        """Extract and normalize host names from Apple's support tables."""
+        try:
+            tree = html.fromstring(html_content)
+        except (ValueError, TypeError) as exc:
+            raise ScrapeError(f"Could not parse Apple support page: {exc}") from exc
 
-        Args:
-            profiles: Dictionary mapping names to content
-            output_dir: Output directory path
+        domains = set()
+        host_tables = 0
 
-        Returns:
-            List of saved file paths
-        """
-        saved_files = []
-        output_path = Path(output_dir)
-        output_path.mkdir(parents=True, exist_ok=True)
+        for table in tree.xpath("//table"):
+            first_row = table.xpath(".//tr[1]/*")
+            if not first_row:
+                continue
 
-        for name, content in profiles.items():
-            try:
-                # Create safe filename
-                safe_name = "".join(c for c in name if c.isalnum() or c in ('-', '_')).lower()
-                file_path = output_path / f"{safe_name}.mobileconfig"
-                
-                with open(file_path, 'wb') as f:
-                    f.write(content)
-                
-                saved_files.append(str(file_path))
-                logger.info(f"Saved profile to {file_path}")
-            except Exception as e:
-                logger.error(f"Failed to save profile {name}: {e}")
+            first_header = " ".join(first_row[0].itertext()).strip().lower()
+            if first_header not in {"主机", "host"}:
+                continue
 
-        return saved_files
+            host_tables += 1
+            for cell in table.xpath(".//tr[position() > 1]/td[1]"):
+                cell_text = " ".join(cell.itertext())
+                for match in cls.DOMAIN_PATTERN.findall(cell_text):
+                    domain = match.lower().rstrip(".")
+                    if domain.startswith("*."):
+                        domain = domain[2:]
+                    domains.add(domain)
+
+        if not host_tables:
+            raise ScrapeError("Apple support page contains no recognized host tables")
+        if not domains:
+            raise ScrapeError("Apple support page yielded no domains")
+
+        return sorted(domains)
+
+    def fetch_apple_domains(self, url: str) -> List[str]:
+        domains = self.extract_apple_domains(self._fetch_page(url))
+        logger.info("Extracted %s Apple candidate domains", len(domains))
+        return domains

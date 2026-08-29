@@ -8,13 +8,25 @@ import plistlib
 import logging
 import tempfile
 import uuid
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
+from urllib.parse import urlparse
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class DnsEndpoint:
+    """A DNS-over-HTTPS endpoint discovered in an upstream profile."""
+
+    source: str
+    url: str
+    payload_identifier: str
+    display_name: str
 
 
 class CryptoHandler:
@@ -122,6 +134,41 @@ class CryptoHandler:
             logger.error(f"Plist parsing error: {e}")
             return None
 
+    def parse_profile_bytes(self, content: bytes) -> Dict[str, Any]:
+        """Parse an unsigned plist or verify and decode a CMS mobileconfig."""
+        try:
+            return plistlib.loads(content)
+        except (plistlib.InvalidFileException, ValueError):
+            pass
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            input_file = Path(temp_dir) / "profile.mobileconfig"
+            output_file = Path(temp_dir) / "profile.plist"
+            input_file.write_bytes(content)
+
+            cmd = [
+                "openssl",
+                "smime",
+                "-verify",
+                "-inform",
+                "DER",
+                "-in",
+                str(input_file),
+                "-noverify",
+                "-out",
+                str(output_file),
+            ]
+            try:
+                subprocess.run(cmd, capture_output=True, text=True, check=True)
+            except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+                details = getattr(exc, "stderr", "") or str(exc)
+                raise ValueError(f"Could not decode mobileconfig: {details}") from exc
+
+            try:
+                return plistlib.loads(output_file.read_bytes())
+            except (plistlib.InvalidFileException, ValueError) as exc:
+                raise ValueError("Decoded mobileconfig is not a valid plist") from exc
+
     def split_certificate_chain(self, fullchain_path: str) -> tuple[Optional[str], Optional[str]]:
         """
         将 fullchain.pem 分离为服务器证书和证书链。
@@ -204,36 +251,52 @@ class CryptoHandler:
             logger.error(f"证书链分离失败: {e}")
             return None, None
 
-    def extract_domains(self, plist_data: Dict[str, Any]) -> List[str]:
-        """
-        Extract domain list from parsed plist PayloadContent.
+    def extract_dns_endpoints(
+        self,
+        plist_data: Dict[str, Any],
+        source: str,
+    ) -> List[DnsEndpoint]:
+        """Extract every valid HTTPS DNS endpoint from a configuration profile."""
+        endpoints: List[DnsEndpoint] = []
 
-        Args:
-            plist_data: Parsed plist dictionary
+        def visit(value: Any) -> None:
+            if isinstance(value, list):
+                for child in value:
+                    visit(child)
+                return
+            if not isinstance(value, dict):
+                return
 
-        Returns:
-            List of domains
-        """
-        domains = []
-        
-        try:
-            payload_content = plist_data.get('PayloadContent', [])
-            
-            if isinstance(payload_content, list):
-                for payload in payload_content:
-                    if isinstance(payload, dict):
-                        dns_settings = payload.get('DNSSettings', {})
-                        if isinstance(dns_settings, dict):
-                            match_domains = dns_settings.get('SupplementalMatchDomains', [])
-                            if isinstance(match_domains, list):
-                                domains.extend(match_domains)
-            
-            logger.info(f"Extracted {len(domains)} domains from plist")
-            return domains
+            dns_settings = value.get("DNSSettings")
+            if isinstance(dns_settings, dict):
+                protocol = str(dns_settings.get("DNSProtocol", "")).upper()
+                server_url = dns_settings.get("ServerURL")
+                if protocol == "HTTPS" and isinstance(server_url, str):
+                    parsed = urlparse(server_url)
+                    if (
+                        parsed.scheme == "https"
+                        and parsed.hostname
+                        and not parsed.username
+                        and not parsed.password
+                    ):
+                        endpoints.append(
+                            DnsEndpoint(
+                                source=source,
+                                url=server_url,
+                                payload_identifier=str(
+                                    value.get("PayloadIdentifier", "")
+                                ),
+                                display_name=str(value.get("PayloadDisplayName", "")),
+                            )
+                        )
 
-        except Exception as e:
-            logger.error(f"Domain extraction error: {e}")
-            return []
+            for child in value.values():
+                visit(child)
+
+        visit(plist_data)
+        unique = list(dict.fromkeys(endpoints))
+        logger.info("Extracted %s DoH endpoints from %s", len(unique), source)
+        return unique
 
     def create_profile(
         self,
@@ -241,7 +304,8 @@ class CryptoHandler:
         output_file: str = None,
         updated_utc: str = None,
         domain_count: int = None,
-        backend_host: str = 'reject.rzmy.dpdns.org'
+        backend_host: str = 'reject.rzmy.dpdns.org',
+        profile_name: str = 'RevokeGuard'
     ) -> Optional[str]:
         """
         Create a new .mobileconfig plist file with the given domains.
@@ -252,6 +316,7 @@ class CryptoHandler:
             updated_utc: Timestamp in UTC (YYYY-MM-DD HH:MM:SS UTC)
             domain_count: Total number of merged domains
             backend_host: Backend host for description metadata
+            profile_name: Display name prefix for the generated profile
 
         Returns:
             Path to created plist file or None if creation fails
@@ -263,7 +328,7 @@ class CryptoHandler:
 
         try:
             domain_total = domain_count if domain_count is not None else len(set(domains))
-            updated_value = updated_utc or datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+            updated_value = updated_utc or datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
             display_date = updated_value.split(' ')[0]
 
             # Create base mobileconfig structure
@@ -272,7 +337,7 @@ class CryptoHandler:
                 'PayloadType': 'Configuration',
                 'PayloadIdentifier': f'com.revokeGuard.{uuid.uuid4()}',
                 'PayloadUUID': str(uuid.uuid4()),
-                'PayloadDisplayName': f'RevokeGuard {display_date}',
+                'PayloadDisplayName': f'{profile_name} {display_date}',
                 'PayloadDescription': (
                     f'Auto-generated on {updated_value}. '
                     f'Blocked Domains: {domain_total}. '
@@ -289,7 +354,7 @@ class CryptoHandler:
                         'PayloadType': 'com.apple.dnsSettings.managed',
                         'PayloadIdentifier': f'com.revokeGuard.dns.{uuid.uuid4()}',
                         'PayloadUUID': str(uuid.uuid4()),
-                        'PayloadDisplayName': 'DNS Settings',
+                        'PayloadDisplayName': f'{profile_name} DNS Settings',
                         'DNSSettings': {
                             'DNSProtocol': 'HTTPS',
                             'ServerURL': 'https://reject.rzmy.dpdns.org/dns-query',

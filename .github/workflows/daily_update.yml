@@ -1,144 +1,152 @@
-name: Daily iOS Anti-Revoke Profile Update
+name: Daily iOS Anti-Revoke Update
 
 on:
   schedule:
-    # Run at 00:00 UTC every day
     - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
       debug:
-        description: 'Enable debug logging'
+        description: Enable debug logging
         required: false
         default: false
+        type: boolean
+
+concurrency:
+  group: daily-ios-antirevoke-update
+  cancel-in-progress: false
 
 jobs:
   update:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-
-      - name: Cache pip packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install -r requirements-dev.txt
 
-      - name: Write SSL certificates
+      - name: Run tests
+        run: python -m pytest -q
+
+      - name: Write and validate signing credentials
         env:
           SSL_CERT: ${{ secrets.SSL_CERT }}
           SSL_KEY: ${{ secrets.SSL_KEY }}
         run: |
-          echo "$SSL_CERT" > fullchain.pem
-          echo "$SSL_KEY" > privkey.pem
+          if [ -z "$SSL_CERT" ] || [ -z "$SSL_KEY" ]; then
+            echo "SSL_CERT and SSL_KEY secrets are required" >&2
+            exit 1
+          fi
+          printf '%s\n' "$SSL_CERT" > fullchain.pem
+          printf '%s\n' "$SSL_KEY" > privkey.pem
           chmod 600 fullchain.pem privkey.pem
-          openssl x509 -in fullchain.pem -text -noout > /dev/null || echo "Warning: Certificate validation failed"
+          openssl x509 -in fullchain.pem -noout -subject
+          openssl pkey -in privkey.pem -check -noout
 
-      - name: Verify OpenSSL
-        run: |
-          openssl version
-          which openssl
-
-      - name: Run update pipeline
-        run: |
-          python main.py
+      - name: Run discovery and generation pipeline
         env:
           SSL_CERT_PATH: fullchain.pem
           SSL_KEY_PATH: privkey.pem
+          DEBUG_MODE: ${{ inputs.debug || false }}
+        run: |
+          if [ "$DEBUG_MODE" = "true" ]; then
+            python main.py --debug
+          else
+            python main.py
+          fi
 
-      - name: Check for changes
+      - name: Validate generated artifacts
+        run: |
+          test -s output/RevokeGuard_Auto-Sync.mobileconfig
+          test -s output/RevokeGuard_QuantumultX.txt
+          test -s output/RevokeGuard_Surge.txt
+          test -s output/RevokeGuard_Loon.txt
+          test -s output/RevokeGuard_Shadowrocket.txt
+          test -s output/RevokeGuard_hosts.txt
+          test -s output/domains.txt
+          test -s output/metadata.json
+          test -s output/enhanced/RevokeGuard_Enhanced.mobileconfig
+          test -s output/enhanced/RevokeGuard_Enhanced_QuantumultX.txt
+          test -s output/enhanced/RevokeGuard_Enhanced_Surge.txt
+          test -s output/enhanced/RevokeGuard_Enhanced_Loon.txt
+          test -s output/enhanced/RevokeGuard_Enhanced_Shadowrocket.txt
+          test -s output/enhanced/RevokeGuard_Enhanced_hosts.txt
+          test -s output/enhanced/enhanced-domains.txt
+          test -s output/enhanced/metadata.json
+          openssl smime -verify \
+            -inform DER \
+            -in output/RevokeGuard_Auto-Sync.mobileconfig \
+            -noverify \
+            -out /dev/null
+          openssl smime -verify \
+            -inform DER \
+            -in output/enhanced/RevokeGuard_Enhanced.mobileconfig \
+            -noverify \
+            -out /dev/null
+
+      - name: Remove signing credentials
+        if: always()
+        run: rm -f fullchain.pem privkey.pem
+
+      - name: Check for output changes
         id: changes
         run: |
           git add output/
           if git diff --cached --quiet; then
-            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
-            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
-          git status
 
-      - name: Cleanup sensitive files
-        if: always()
-        run: |
-          rm -f fullchain.pem privkey.pem
-
-      - name: Commit and push changes
+      - name: Commit and push output changes
         if: steps.changes.outputs.has_changes == 'true'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          
-          git add output/
-          git commit -m "chore: update iOS Anti-Revoke profiles
-
-          - Generated new .mobileconfig profiles
-          - Updated filter rules for all proxy tools
-          - Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-          
+          git commit -m "chore: update iOS Anti-Revoke rules"
           git push
 
-      - name: Create pull request (optional alternative)
-        if: steps.changes.outputs.has_changes == 'true' && github.event_name == 'schedule'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          commit-message: 'chore: update iOS Anti-Revoke profiles'
-          title: 'chore: daily iOS Anti-Revoke profile update'
-          body: |
-            ## Changes
-            - Updated iOS Anti-Revoke .mobileconfig profiles
-            - Regenerated filter rules for Quantumult X, Surge, Loon, and Shadowrocket
-            - Updated domain blocklist
-            
-            **Generated by:** GitHub Actions
-            **Time:** ${{ github.event.repository.updated_at }}
-          branch: auto/revoke-profiles-update
-          delete-branch: true
-          labels: 'automated,profiles'
-          assignees: |
-            ${{ github.repository_owner }}
-
-      - name: Upload artifacts (optional)
+      - name: Upload generated artifacts
+        if: success()
         uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: profiles-and-rules
+          name: ios-antirevoke-rules
           path: output/
           retention-days: 30
 
-      - name: Generate summary
+      - name: Write job summary
         if: always()
         run: |
-          echo "## iOS Anti-Revoke Update Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Timestamp:** $(date -u)" >> $GITHUB_STEP_SUMMARY
-          
+          echo "## iOS Anti-Revoke Update" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Status: ${{ job.status }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_STEP_SUMMARY"
           if [ -f output/metadata.json ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Build Details" >> $GITHUB_STEP_SUMMARY
-            cat output/metadata.json >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          if [ -f output/domains.txt ]; then
-            DOMAIN_COUNT=$(wc -l < output/domains.txt)
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Total Domains:** $DOMAIN_COUNT" >> $GITHUB_STEP_SUMMARY
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+
+          with open("output/metadata.json", encoding="utf-8") as file_handle:
+              data = json.load(file_handle)
+
+          print(f"- Apple candidates: {data['apple_source']['candidate_domains']}")
+          print(f"- Normal target domains: {data['normal_discovery']['target_domains']}")
+          print(f"- Enhanced extra domains: {data['enhanced_discovery']['extra_domains']}")
+          print(f"- Enhanced profile domains: {data['enhanced_discovery']['merged_profile_domains']}")
+          PY
           fi

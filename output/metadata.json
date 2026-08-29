@@ -1,25 +1,282 @@
 {
-  "timestamp": "2026-08-20T00:32:56.477967Z",
-  "total_domains": 10,
-  "sources_processed": 1,
-  "generated_files": {
-    "Quantumult X": "output/RevokeGuard_QuantumultX.txt",
-    "Surge": "output/RevokeGuard_Surge.txt",
-    "Loon": "output/RevokeGuard_Loon.txt",
-    "Shadowrocket": "output/RevokeGuard_Shadowrocket.txt",
-    "Hosts": "output/RevokeGuard_hosts.txt",
-    "Domain List": "output/domains.txt"
+  "schema_version": 3,
+  "timestamp": "2026-08-29T16:10:26.403776Z",
+  "apple_source": {
+    "url": "https://support.apple.com/zh-cn/101555",
+    "candidate_domains": 133
   },
-  "source_details": {
+  "profile_sources": {
+    "khoindvn": {
+      "page_url": "https://khoindvn.io.vn/",
+      "xpath": "/html/body/main/div[1]/div/a[6]",
+      "download_url": "https://github.com/dns-khoindvn/oci-auto-vm/releases/download/DNS/khoindvn.mobileconfig",
+      "profile_size": 16281,
+      "discovered_endpoints": [
+        {
+          "source": "khoindvn",
+          "url": "https://qhlfy08c6u.cloudflare-gateway.com/dns-query",
+          "payload_identifier": "com.apple.dnsSettings.managed.bf38e538-86b3-4ec9-8ab2-2d51bb6bb3a7",
+          "display_name": "Anti Revoke"
+        }
+      ],
+      "selected_endpoint": {
+        "source": "khoindvn",
+        "url": "https://qhlfy08c6u.cloudflare-gateway.com/dns-query",
+        "payload_identifier": "com.apple.dnsSettings.managed.bf38e538-86b3-4ec9-8ab2-2d51bb6bb3a7",
+        "display_name": "Anti Revoke"
+      },
+      "enhanced_endpoint": null
+    },
     "applejr": {
-      "domains_count": 10,
-      "domains_sample": [
-        "certs.apple.com",
-        "crl.apple.com",
-        "ocsp.apple.com",
-        "ocsp2.apple.com",
-        "valid.apple.com"
+      "page_url": "https://applejr.net/",
+      "xpath": "//*[@id=\"cat-esign\"]/div[1]/a",
+      "download_url": "https://applejr.ipadownloads.com/signed/panel/AppleJr_AntiRevoke.mobileconfig",
+      "profile_size": 694848,
+      "discovered_endpoints": [
+        {
+          "source": "applejr",
+          "url": "https://vevrl9air2.cloudflare-gateway.com/dns-query",
+          "payload_identifier": "net.applejr.dns.global.bf6eda5f-2b11-4559-8249-28db1689552a",
+          "display_name": "AppleJr Anti Revoke"
+        }
+      ],
+      "selected_endpoint": {
+        "source": "applejr",
+        "url": "https://vevrl9air2.cloudflare-gateway.com/dns-query",
+        "payload_identifier": "net.applejr.dns.global.bf6eda5f-2b11-4559-8249-28db1689552a",
+        "display_name": "AppleJr Anti Revoke"
+      },
+      "enhanced_endpoint": null
+    },
+    "sideloading": {
+      "page_url": "https://sideloading.net/dns/",
+      "xpath": "/html/body/main/div/section[1]/div[1]/a[1]",
+      "download_url": "https://sideloading.net/dns/nexdns.mobileconfig",
+      "profile_size": 6969,
+      "discovered_endpoints": [
+        {
+          "source": "sideloading",
+          "url": "https://novadns-dynamic.novadev.vip/dns-query",
+          "payload_identifier": "novadev.nexdns.dynamic",
+          "display_name": "NexDNS Dynamic"
+        },
+        {
+          "source": "sideloading",
+          "url": "https://novadns.novadev.vip/dns-query",
+          "payload_identifier": "novadev.nexdns.whileinstalling",
+          "display_name": "NexDNS - Use when installing apps"
+        },
+        {
+          "source": "sideloading",
+          "url": "https://novadns-ppq.novadev.vip/dns-query",
+          "payload_identifier": "novadev.nexdns.afterinstalling",
+          "display_name": "NexDNS - Use after installing apps"
+        }
+      ],
+      "selected_endpoint": {
+        "source": "sideloading",
+        "url": "https://novadns.novadev.vip/dns-query",
+        "payload_identifier": "novadev.nexdns.whileinstalling",
+        "display_name": "NexDNS - Use when installing apps"
+      },
+      "enhanced_endpoint": {
+        "source": "sideloading",
+        "url": "https://novadns-ppq.novadev.vip/dns-query",
+        "payload_identifier": "novadev.nexdns.afterinstalling",
+        "display_name": "NexDNS - Use after installing apps"
+      }
+    }
+  },
+  "selected_dns_endpoints": [
+    {
+      "source": "khoindvn",
+      "url": "https://qhlfy08c6u.cloudflare-gateway.com/dns-query",
+      "payload_identifier": "com.apple.dnsSettings.managed.bf38e538-86b3-4ec9-8ab2-2d51bb6bb3a7",
+      "display_name": "Anti Revoke"
+    },
+    {
+      "source": "applejr",
+      "url": "https://vevrl9air2.cloudflare-gateway.com/dns-query",
+      "payload_identifier": "net.applejr.dns.global.bf6eda5f-2b11-4559-8249-28db1689552a",
+      "display_name": "AppleJr Anti Revoke"
+    },
+    {
+      "source": "sideloading",
+      "url": "https://novadns.novadev.vip/dns-query",
+      "payload_identifier": "novadev.nexdns.whileinstalling",
+      "display_name": "NexDNS - Use when installing apps"
+    }
+  ],
+  "enhanced_dns_endpoint": {
+    "source": "sideloading",
+    "url": "https://novadns-ppq.novadev.vip/dns-query",
+    "payload_identifier": "novadev.nexdns.afterinstalling",
+    "display_name": "NexDNS - Use after installing apps"
+  },
+  "reference_doh_url": "https://cloudflare-dns.com/dns-query",
+  "normal_discovery": {
+    "target_domains": 13,
+    "blocked_by": {
+      "app-site-association.networking.apple": [
+        "khoindvn"
+      ],
+      "appattest.apple.com": [
+        "applejr",
+        "khoindvn",
+        "sideloading"
+      ],
+      "certs.apple.com": [
+        "applejr",
+        "khoindvn",
+        "sideloading"
+      ],
+      "crl.apple.com": [
+        "applejr",
+        "khoindvn",
+        "sideloading"
+      ],
+      "crl3.digicert.com": [
+        "khoindvn"
+      ],
+      "crl4.digicert.com": [
+        "khoindvn"
+      ],
+      "idv.cdn-apple.com": [
+        "khoindvn"
+      ],
+      "metrics.icloud.com": [
+        "applejr"
+      ],
+      "ocsp.apple.com": [
+        "applejr",
+        "khoindvn",
+        "sideloading"
+      ],
+      "ocsp.digicert.com": [
+        "khoindvn"
+      ],
+      "ocsp2.apple.com": [
+        "applejr",
+        "khoindvn",
+        "sideloading"
+      ],
+      "valid.apple.com": [
+        "applejr",
+        "sideloading"
+      ],
+      "vpp.itunes.apple.com": [
+        "applejr",
+        "sideloading"
       ]
+    },
+    "inconclusive_domains": [
+      "apple-dns.net",
+      "apple-livephotoskit.com",
+      "apple-mapkit.com",
+      "apps-marketplace.apple.com",
+      "apzones.com",
+      "cdn-apple.com",
+      "icloud.apple.com",
+      "iwork.apple.com",
+      "playground-assets-cdn.apple.com",
+      "playground-cdn.apple.com",
+      "push.apple.com",
+      "smoot.apple.com"
+    ],
+    "endpoint_stats": {
+      "khoindvn": {
+        "invalid_address": 10,
+        "negative": 12,
+        "valid": 111
+      },
+      "applejr": {
+        "invalid_address": 8,
+        "negative": 12,
+        "valid": 113
+      },
+      "sideloading": {
+        "invalid_address": 7,
+        "negative": 12,
+        "valid": 114
+      }
+    },
+    "reference_queries": 12
+  },
+  "enhanced_discovery": {
+    "endpoint_target_domains": 8,
+    "extra_domains": 1,
+    "extra_domain_list": [
+      "ppq.apple.com"
+    ],
+    "merged_profile_domains": 14,
+    "blocked_by": {
+      "appattest.apple.com": [
+        "sideloading"
+      ],
+      "certs.apple.com": [
+        "sideloading"
+      ],
+      "crl.apple.com": [
+        "sideloading"
+      ],
+      "ocsp.apple.com": [
+        "sideloading"
+      ],
+      "ocsp2.apple.com": [
+        "sideloading"
+      ],
+      "ppq.apple.com": [
+        "sideloading"
+      ],
+      "valid.apple.com": [
+        "sideloading"
+      ],
+      "vpp.itunes.apple.com": [
+        "sideloading"
+      ]
+    },
+    "inconclusive_domains": [
+      "apple-dns.net",
+      "apple-livephotoskit.com",
+      "apple-mapkit.com",
+      "apps-marketplace.apple.com",
+      "apzones.com",
+      "cdn-apple.com",
+      "icloud.apple.com",
+      "iwork.apple.com",
+      "playground-assets-cdn.apple.com",
+      "playground-cdn.apple.com",
+      "push.apple.com",
+      "smoot.apple.com"
+    ],
+    "endpoint_stats": {
+      "sideloading": {
+        "invalid_address": 8,
+        "negative": 12,
+        "valid": 113
+      }
+    },
+    "reference_queries": 12
+  },
+  "generated_files": {
+    "normal": {
+      "Quantumult X": "output\\RevokeGuard_QuantumultX.txt",
+      "Surge": "output\\RevokeGuard_Surge.txt",
+      "Loon": "output\\RevokeGuard_Loon.txt",
+      "Shadowrocket": "output\\RevokeGuard_Shadowrocket.txt",
+      "Hosts": "output\\RevokeGuard_hosts.txt",
+      "Domain List": "output\\domains.txt",
+      "iOS Profile": "output\\RevokeGuard_Auto-Sync.mobileconfig"
+    },
+    "enhanced": {
+      "Quantumult X": "output\\enhanced\\RevokeGuard_Enhanced_QuantumultX.txt",
+      "Surge": "output\\enhanced\\RevokeGuard_Enhanced_Surge.txt",
+      "Loon": "output\\enhanced\\RevokeGuard_Enhanced_Loon.txt",
+      "Shadowrocket": "output\\enhanced\\RevokeGuard_Enhanced_Shadowrocket.txt",
+      "Hosts": "output\\enhanced\\RevokeGuard_Enhanced_hosts.txt",
+      "Domain List": "output\\enhanced\\enhanced-domains.txt",
+      "iOS Profile": "output\\enhanced\\RevokeGuard_Enhanced.mobileconfig",
+      "Metadata": "output\\enhanced\\metadata.json"
     }
   }
 }

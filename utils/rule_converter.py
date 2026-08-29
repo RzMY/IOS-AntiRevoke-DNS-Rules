@@ -175,15 +175,24 @@ class RuleFileGenerator:
     Generates and saves rule files for different proxy tools.
     """
 
-    def __init__(self, output_dir: str = 'output'):
+    def __init__(
+        self,
+        output_dir: str = 'output',
+        file_prefix: str = 'RevokeGuard',
+        domain_filename: str = 'domains.txt'
+    ):
         """
         Initialize rule file generator.
 
         Args:
             output_dir: Output directory for rule files
+            file_prefix: Prefix used for platform rule filenames
+            domain_filename: Filename used for the plain domain list
         """
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.file_prefix = file_prefix
+        self.domain_filename = domain_filename
         self.converter = RuleConverter()
 
     def generate_all_rules(self, domains: List[str], author: str, updated_utc: str, domain_count: int) -> dict:
@@ -201,7 +210,7 @@ class RuleFileGenerator:
         try:
             # Generate Quantumult X rules
             qx_rules = self.converter.generate_quantumultx_rules(domains, author, updated_utc, domain_count)
-            qx_file = self.output_dir / 'RevokeGuard_QuantumultX.txt'
+            qx_file = self.output_dir / f'{self.file_prefix}_QuantumultX.txt'
             with open(qx_file, 'w', encoding='utf-8') as f:
                 f.write(qx_rules)
             generated_files['Quantumult X'] = str(qx_file)
@@ -213,7 +222,7 @@ class RuleFileGenerator:
         try:
             # Generate Surge rules
             surge_rules = self.converter.generate_surge_rules(domains, author, updated_utc, domain_count)
-            surge_file = self.output_dir / 'RevokeGuard_Surge.txt'
+            surge_file = self.output_dir / f'{self.file_prefix}_Surge.txt'
             with open(surge_file, 'w', encoding='utf-8') as f:
                 f.write(surge_rules)
             generated_files['Surge'] = str(surge_file)
@@ -225,7 +234,7 @@ class RuleFileGenerator:
         try:
             # Generate Loon rules
             loon_rules = self.converter.generate_loon_rules(domains, author, updated_utc, domain_count)
-            loon_file = self.output_dir / 'RevokeGuard_Loon.txt'
+            loon_file = self.output_dir / f'{self.file_prefix}_Loon.txt'
             with open(loon_file, 'w', encoding='utf-8') as f:
                 f.write(loon_rules)
             generated_files['Loon'] = str(loon_file)
@@ -237,7 +246,7 @@ class RuleFileGenerator:
         try:
             # Generate Shadowrocket rules
             sr_rules = self.converter.generate_shadowrocket_rules(domains, author, updated_utc, domain_count)
-            sr_file = self.output_dir / 'RevokeGuard_Shadowrocket.txt'
+            sr_file = self.output_dir / f'{self.file_prefix}_Shadowrocket.txt'
             with open(sr_file, 'w', encoding='utf-8') as f:
                 f.write(sr_rules)
             generated_files['Shadowrocket'] = str(sr_file)
@@ -249,7 +258,7 @@ class RuleFileGenerator:
         try:
             # Generate hosts file rules
             hosts_rules = self.converter.generate_hosts_rules(domains, author, updated_utc, domain_count)
-            hosts_file = self.output_dir / 'RevokeGuard_hosts.txt'
+            hosts_file = self.output_dir / f'{self.file_prefix}_hosts.txt'
             with open(hosts_file, 'w', encoding='utf-8') as f:
                 f.write(hosts_rules)
             generated_files['Hosts'] = str(hosts_file)
@@ -260,7 +269,7 @@ class RuleFileGenerator:
 
         # Generate domain list file
         try:
-            domain_file = self.output_dir / 'domains.txt'
+            domain_file = self.output_dir / self.domain_filename
             with open(domain_file, 'w', encoding='utf-8') as f:
                 header_lines = RuleConverter._build_header('#', author, updated_utc, domain_count)
                 for line in header_lines:
