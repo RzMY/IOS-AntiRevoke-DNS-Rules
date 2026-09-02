@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "timestamp": "2026-09-01T02:24:26.450342Z",
+  "timestamp": "2026-09-02T01:45:58.822554Z",
   "apple_source": {
     "url": "https://support.apple.com/zh-cn/101555",
     "candidate_domains": 133
@@ -10,7 +10,7 @@
       "page_url": "https://khoindvn.io.vn/",
       "xpath": "/html/body/main/div[1]/div/a[6]",
       "download_url": "https://github.com/dns-khoindvn/oci-auto-vm/releases/download/DNS/khoindvn.mobileconfig",
-      "profile_size": 16281,
+      "profile_size": 16284,
       "discovered_endpoints": [
         {
           "source": "khoindvn",
