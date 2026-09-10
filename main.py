@@ -28,7 +28,7 @@ MAX_TARGET_RATIO = 0.5
 PROFILE_SOURCES = [
     {
         "url": "https://khoindvn.io.vn/",
-        "xpath": "/html/body/main/div[1]/div/a[6]",
+        "xpath": "/html/body/main/div[1]/div/a[5]",
         "name": "khoindvn",
     },
     {
