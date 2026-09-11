@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "timestamp": "2026-09-10T04:48:07.220846Z",
+  "timestamp": "2026-09-11T01:51:22.592296Z",
   "apple_source": {
     "url": "https://support.apple.com/zh-cn/101555",
     "candidate_domains": 133
@@ -115,41 +115,21 @@
   },
   "reference_doh_url": "https://cloudflare-dns.com/dns-query",
   "normal_discovery": {
-    "target_domains": 12,
+    "target_domains": 7,
     "blocked_by": {
-      "app-site-association.networking.apple": [
-        "khoindvn"
-      ],
       "appattest.apple.com": [
-        "khoindvn",
         "sideloading"
       ],
       "certs.apple.com": [
-        "khoindvn",
         "sideloading"
       ],
       "crl.apple.com": [
-        "khoindvn",
         "sideloading"
-      ],
-      "crl3.digicert.com": [
-        "khoindvn"
-      ],
-      "crl4.digicert.com": [
-        "khoindvn"
-      ],
-      "idv.cdn-apple.com": [
-        "khoindvn"
       ],
       "ocsp.apple.com": [
-        "khoindvn",
         "sideloading"
       ],
-      "ocsp.digicert.com": [
-        "khoindvn"
-      ],
       "ocsp2.apple.com": [
-        "khoindvn",
         "sideloading"
       ],
       "valid.apple.com": [
@@ -175,9 +155,8 @@
     ],
     "endpoint_stats": {
       "khoindvn": {
-        "invalid_address": 10,
-        "negative": 12,
-        "valid": 111
+        "negative": 13,
+        "valid": 120
       },
       "applejr": {
         "negative": 13,
@@ -197,7 +176,7 @@
     "extra_domain_list": [
       "ppq.apple.com"
     ],
-    "merged_profile_domains": 13,
+    "merged_profile_domains": 8,
     "blocked_by": {
       "appattest.apple.com": [
         "sideloading"

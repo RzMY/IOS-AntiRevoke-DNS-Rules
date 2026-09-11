@@ -1,19 +1,14 @@
 # Project: iOS-AntiRevoke-DNS-Rules
 # Author: RzMY
-# Updated: 2026-09-10 04:48:07 UTC
-# Domain Count: 12
+# Updated: 2026-09-11 01:51:22 UTC
+# Domain Count: 7
 # License: MIT License
 # Format: IP domain
 
-0.0.0.0 app-site-association.networking.apple
 0.0.0.0 appattest.apple.com
 0.0.0.0 certs.apple.com
 0.0.0.0 crl.apple.com
-0.0.0.0 crl3.digicert.com
-0.0.0.0 crl4.digicert.com
-0.0.0.0 idv.cdn-apple.com
 0.0.0.0 ocsp.apple.com
-0.0.0.0 ocsp.digicert.com
 0.0.0.0 ocsp2.apple.com
 0.0.0.0 valid.apple.com
 0.0.0.0 vpp.itunes.apple.com
