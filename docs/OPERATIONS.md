@@ -52,7 +52,7 @@ When a page changes:
 
 1. Update its XPath only after confirming that it points to the intended `.mobileconfig` link.
 2. Run `python main.py --debug` in the `mine` environment.
-3. Inspect `output/metadata.json` and confirm the resolved download URL and selected endpoints.
+3. Inspect `output/metadata.json` and confirm the resolved download URL and selected endpoints. A non-empty `domains` list means the payload was used directly; its `profile_domains` statistic records the domain count without DNS queries.
 4. If a profile contains multiple DNS payloads, set `preferred_payload_identifier` and `enhanced_payload_identifier` explicitly instead of relying on page order.
 5. Add or update a unit test for any parser behavior change.
 
@@ -62,9 +62,9 @@ When a page changes:
 
 The upstream page layout changed. Update the source XPath and verify that the target response is a mobileconfig rather than HTML.
 
-`Profile ... contains no valid HTTPS DNS endpoint`
+`Profile ... contains no valid HTTPS DNS endpoint or domain list`
 
-The downloaded profile changed format, moved to another DNS protocol, or is no longer the intended file. Inspect the decoded plist before changing selection logic.
+The downloaded profile has neither a usable `DNSSettings.SupplementalMatchDomains` list nor a valid HTTPS endpoint. Inspect the decoded plist before changing selection logic. A valid explicit list is sufficient even if the payload has no endpoint or its URL points to an ordinary website.
 
 `DNS queries failed; refusing partial output`
 

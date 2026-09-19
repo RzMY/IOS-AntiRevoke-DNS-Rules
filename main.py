@@ -94,7 +94,7 @@ class AntiRevokeOrchestrator:
     ) -> DnsEndpoint:
         if not endpoints:
             raise RuntimeError(
-                f"Profile {source['name']} contains no valid HTTPS DNS endpoint"
+                f"Profile {source['name']} contains no valid HTTPS DNS endpoint or domain list"
             )
 
         preferred_identifier = source.get("preferred_payload_identifier")
@@ -150,13 +150,21 @@ class AntiRevokeOrchestrator:
                     asdict(enhanced_endpoint) if enhanced_identifier else None
                 ),
             }
-            logger.info("Selected %s endpoint: %s", name, endpoint.url)
+            logger.info(
+                "Selected %s payload: %s",
+                name,
+                f"{len(endpoint.domains)} explicit domains" if endpoint.domains else endpoint.url,
+            )
 
         if len(selected) != len(sources):
-            raise RuntimeError("Not every required profile yielded a DNS endpoint")
+            raise RuntimeError("Not every required profile yielded a DNS payload")
         if enhanced_endpoint is None:
             raise RuntimeError("No enhanced DNS endpoint was selected")
-        logger.info("Selected enhanced endpoint: %s", enhanced_endpoint.url)
+        logger.info(
+            "Selected enhanced payload: %s",
+            f"{len(enhanced_endpoint.domains)} explicit domains"
+            if enhanced_endpoint.domains else enhanced_endpoint.url,
+        )
         return selected, enhanced_endpoint
 
     def generate_profile(

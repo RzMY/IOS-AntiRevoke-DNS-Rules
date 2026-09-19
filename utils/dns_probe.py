@@ -47,7 +47,7 @@ class DomainDiscoveryReport:
 
 
 class DoHDomainProbe:
-    """Query candidate domains against upstream filtering DoH endpoints."""
+    """Combine profile domain lists with filtering DoH discovery results."""
 
     QUERY_TYPES = ("A", "AAAA")
 
@@ -191,40 +191,54 @@ class DoHDomainProbe:
         domains: Sequence[str],
         endpoints: Sequence[DnsEndpoint],
     ) -> DomainDiscoveryReport:
-        if not domains:
-            raise DnsProbeError("No Apple candidate domains were provided")
         if not endpoints:
-            raise DnsProbeError("No upstream DoH endpoints were provided")
+            raise DnsProbeError("No upstream DNS payloads were provided")
+
+        probe_endpoints = [endpoint for endpoint in endpoints if not endpoint.domains]
+        if probe_endpoints and not domains:
+            raise DnsProbeError("No Apple candidate domains were provided")
+
+        blocked_by = defaultdict(set)
+        endpoint_counters: Dict[str, Counter] = {}
+        for endpoint in endpoints:
+            endpoint_counters[endpoint.source] = Counter()
+            if endpoint.domains:
+                for domain in endpoint.domains:
+                    blocked_by[domain].add(endpoint.source)
+                endpoint_counters[endpoint.source]["profile_domains"] = len(
+                    set(endpoint.domains)
+                )
+                logger.info(
+                    "Using %s explicit domains from %s; skipping DNS probing",
+                    len(set(endpoint.domains)),
+                    endpoint.source,
+                )
 
         logger.info(
             "Querying %s candidates against %s upstream endpoints",
             len(domains),
-            len(endpoints),
+            len(probe_endpoints),
         )
         upstream_results = self._resolve_many(
             (endpoint.source, endpoint.url, domain)
-            for endpoint in endpoints
+            for endpoint in probe_endpoints
             for domain in domains
-        )
+        ) if probe_endpoints else {}
 
         negative_domains = {
             domain
-            for endpoint in endpoints
+            for endpoint in probe_endpoints
             for domain in domains
             if upstream_results[(endpoint.source, domain)].state == "negative"
         }
         reference_results = self._resolve_many(
             ("reference", self.reference_url, domain)
             for domain in sorted(negative_domains)
-        )
+        ) if negative_domains else {}
 
-        blocked_by = defaultdict(set)
         inconclusive = set()
-        endpoint_counters: Dict[str, Counter] = {
-            endpoint.source: Counter() for endpoint in endpoints
-        }
 
-        for endpoint in endpoints:
+        for endpoint in probe_endpoints:
             for domain in domains:
                 resolution = upstream_results[(endpoint.source, domain)]
                 endpoint_counters[endpoint.source][resolution.state] += 1

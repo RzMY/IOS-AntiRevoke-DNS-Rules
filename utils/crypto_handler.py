@@ -6,11 +6,13 @@ Handles OpenSSL operations for decrypting, verifying, and signing .mobileconfig 
 import subprocess
 import plistlib
 import logging
+import ipaddress
+import re
 import tempfile
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 
@@ -21,12 +23,13 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class DnsEndpoint:
-    """A DNS-over-HTTPS endpoint discovered in an upstream profile."""
+    """A DNS payload with explicit domains or an endpoint to probe."""
 
     source: str
     url: str
     payload_identifier: str
     display_name: str
+    domains: Tuple[str, ...] = ()
 
 
 class CryptoHandler:
@@ -251,12 +254,38 @@ class CryptoHandler:
             logger.error(f"证书链分离失败: {e}")
             return None, None
 
+    @staticmethod
+    def _extract_match_domains(dns_settings: Dict[str, Any]) -> Tuple[str, ...]:
+        """Normalize explicit DNS match domains, excluding catch-all entries."""
+        values = dns_settings.get("SupplementalMatchDomains", [])
+        if not isinstance(values, list):
+            return ()
+
+        domains = set()
+        for value in values:
+            if not isinstance(value, str):
+                continue
+            domain = value.strip().lower().rstrip(".")
+            if domain.startswith("*."):
+                domain = domain[2:]
+            if len(domain) > 253 or not re.fullmatch(
+                r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+"
+                r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?",
+                domain,
+            ):
+                continue
+            try:
+                ipaddress.ip_address(domain)
+            except ValueError:
+                domains.add(domain)
+        return tuple(sorted(domains))
+
     def extract_dns_endpoints(
         self,
         plist_data: Dict[str, Any],
         source: str,
     ) -> List[DnsEndpoint]:
-        """Extract every valid HTTPS DNS endpoint from a configuration profile."""
+        """Extract DNS payloads with explicit domains or a valid HTTPS endpoint."""
         endpoints: List[DnsEndpoint] = []
 
         def visit(value: Any) -> None:
@@ -269,9 +298,11 @@ class CryptoHandler:
 
             dns_settings = value.get("DNSSettings")
             if isinstance(dns_settings, dict):
+                domains = self._extract_match_domains(dns_settings)
                 protocol = str(dns_settings.get("DNSProtocol", "")).upper()
                 server_url = dns_settings.get("ServerURL")
-                if protocol == "HTTPS" and isinstance(server_url, str):
+                endpoint_url = server_url if domains and isinstance(server_url, str) else ""
+                if not domains and protocol == "HTTPS" and isinstance(server_url, str):
                     parsed = urlparse(server_url)
                     if (
                         parsed.scheme == "https"
@@ -279,23 +310,24 @@ class CryptoHandler:
                         and not parsed.username
                         and not parsed.password
                     ):
-                        endpoints.append(
-                            DnsEndpoint(
-                                source=source,
-                                url=server_url,
-                                payload_identifier=str(
-                                    value.get("PayloadIdentifier", "")
-                                ),
-                                display_name=str(value.get("PayloadDisplayName", "")),
-                            )
+                        endpoint_url = server_url
+                if domains or endpoint_url:
+                    endpoints.append(
+                        DnsEndpoint(
+                            source=source,
+                            url=endpoint_url,
+                            payload_identifier=str(value.get("PayloadIdentifier", "")),
+                            display_name=str(value.get("PayloadDisplayName", "")),
+                            domains=domains,
                         )
+                    )
 
             for child in value.values():
                 visit(child)
 
         visit(plist_data)
         unique = list(dict.fromkeys(endpoints))
-        logger.info("Extracted %s DoH endpoints from %s", len(unique), source)
+        logger.info("Extracted %s DNS payloads from %s", len(unique), source)
         return unique
 
     def create_profile(

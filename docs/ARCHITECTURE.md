@@ -31,7 +31,9 @@ Apple official host tables
  - normal iOS profile           - iOS profile: normal + extra
 ```
 
-All NXDOMAIN or empty answers are checked against a public reference DoH resolver. A domain is published only when the upstream answer differs from a valid public answer, or when the upstream returns a non-global address such as `0.0.0.0`.
+Selected DNS payloads with a non-empty domain list in `DNSSettings.SupplementalMatchDomains` contribute those domains directly to their normal or enhanced result set. Their URLs are not queried, even if present. Lists are normalized and deduplicated; domains outside Apple's candidate tables are retained. Empty, catch-all, and invalid entries are ignored. Domain names in web clips, server addresses, or on-demand connection exceptions are not treated as target lists.
+
+Payloads without an explicit domain list use the probing flow above. All NXDOMAIN or empty answers are checked against a public reference DoH resolver. A probed domain is published only when the upstream answer differs from a valid public answer, or when the upstream returns a non-global address such as `0.0.0.0`.
 
 ## Endpoint selection
 
@@ -39,8 +41,8 @@ The three mobileconfig files are downloaded and decoded on every run. Endpoint U
 
 | Source | Role | Selection |
 | --- | --- | --- |
-| Khoindvn | Normal | First HTTPS DNS payload |
-| AppleJr | Normal | First HTTPS DNS payload |
+| Khoindvn | Normal | First DNS payload with explicit domains or a valid HTTPS endpoint |
+| AppleJr | Normal | First DNS payload with explicit domains or a valid HTTPS endpoint |
 | Sideloading | Normal | `novadev.nexdns.whileinstalling` |
 | Sideloading | Enhanced | `novadev.nexdns.afterinstalling` |
 
@@ -58,13 +60,14 @@ The enhanced endpoint is intentionally excluded from the normal endpoint union. 
 `utils/crypto_handler.py`
 
 - Parses unsigned plist profiles or verifies CMS-signed DER mobileconfig files.
-- Extracts HTTPS DNS endpoints and payload identifiers.
+- Extracts HTTPS DNS endpoints, explicit match-domain lists, and payload identifiers.
 - Creates separately named normal and enhanced iOS profiles.
 - Signs generated profiles with the configured certificate chain.
 
 `utils/dns_probe.py`
 
 - Sends RFC 8484 A and AAAA queries using DNS wire format over HTTPS.
+- Skips upstream and reference queries for payloads with explicit domain lists and merges their domains with probed results, preserving source attribution.
 - Treats non-global addresses as explicit filtering results.
 - Uses the reference resolver to distinguish filtering from legitimate NODATA or NXDOMAIN.
 - Rejects partial output when any required query fails after retries.
@@ -111,7 +114,8 @@ Root `output/metadata.json` uses schema version 3 and records:
 
 - Apple source and candidate count.
 - Every discovered profile endpoint.
+- Each payload's normalized `domains` list (empty for payloads requiring probing).
 - Selected normal endpoints and the enhanced endpoint.
-- Normal discovery details.
+- Normal discovery details, including `profile_domains` counts for sources used directly without probing.
 - Enhanced endpoint targets, additional domains, and merged profile count.
 - Normal and enhanced artifact paths.

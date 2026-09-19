@@ -75,14 +75,14 @@ The daily workflow performs the following operations:
 
 1. Read candidate domains from Apple's official enterprise network page. / 从 Apple 官方企业网络页面读取候选域名。
 2. Download and decode the three upstream DNS profiles. / 下载并解析三个上游 DNS 描述文件。
-3. Query the candidates through the normal endpoints below. / 使用以下正常端点查询候选域名。
-4. Query Sideloading `afterinstalling` separately and calculate its additional domains. / 单独查询 Sideloading `afterinstalling` 并计算新增域名。
+3. Use explicit `DNSSettings.SupplementalMatchDomains` lists directly as results; otherwise query the candidates through the normal endpoints below. / 若所选 payload 的 `DNSSettings.SupplementalMatchDomains` 包含域名列表，直接作为结果，不再探测该源；否则使用以下正常端点查询候选域名。
+4. Process Sideloading `afterinstalling` separately using the same list-or-probe logic and calculate its additional domains. / 按相同的域名列表或探测逻辑单独处理 Sideloading `afterinstalling`，并计算新增域名。
 5. Generate normal outputs and the isolated `output/enhanced/` set. / 生成正常产物及隔离的 `output/enhanced/` 增强产物。
 
 | Source / 来源 | Mode / 模式 | Payload identifier |
 | --- | --- | --- |
-| Khoindvn | Normal / 正常 | First HTTPS DNS payload / 首个 HTTPS DNS payload |
-| AppleJr | Normal / 正常 | First HTTPS DNS payload / 首个 HTTPS DNS payload |
+| Khoindvn | Normal / 正常 | First DNS payload with a domain list or HTTPS endpoint / 首个包含域名列表或 HTTPS 端点的 DNS payload |
+| AppleJr | Normal / 正常 | First DNS payload with a domain list or HTTPS endpoint / 首个包含域名列表或 HTTPS 端点的 DNS payload |
 | Sideloading | Normal / 正常 | `novadev.nexdns.whileinstalling` |
 | Sideloading | Enhanced / 增强 | `novadev.nexdns.afterinstalling` |
 

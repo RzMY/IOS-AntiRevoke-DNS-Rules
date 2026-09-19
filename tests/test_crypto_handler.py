@@ -1,6 +1,8 @@
 import plistlib
 from pathlib import Path
 
+import pytest
+
 from main import AntiRevokeOrchestrator, PROFILE_SOURCES
 from utils.crypto_handler import CryptoHandler
 
@@ -35,6 +37,49 @@ def test_parse_unsigned_profile_and_extract_https_endpoints():
     assert endpoints[0].source == "test-source"
     assert endpoints[0].url == "https://dns.example/dns-query"
     assert endpoints[0].payload_identifier == "example.primary"
+    assert endpoints[0].domains == ()
+
+
+@pytest.mark.parametrize("fmt", [plistlib.FMT_XML, plistlib.FMT_BINARY])
+def test_extract_explicit_domains_without_https_endpoint(fmt):
+    profile = {
+        "PayloadContent": [{
+            "PayloadIdentifier": "explicit",
+            "DNSSettings": {
+                "SupplementalMatchDomains": [
+                    " OCSP.APPLE.COM. ", "*.certs.apple.com", "ocsp.apple.com",
+                    "outside.example", "", "*", "https://not-a-domain.example",
+                    "1.1.1.1", "::1", "-invalid.example", 123,
+                ],
+                "ServerAddresses": ["resolver.example"],
+            },
+            "OnDemandRules": [{"Domains": ["unrelated.example"]}],
+        }],
+    }
+    handler = CryptoHandler()
+    parsed = handler.parse_profile_bytes(plistlib.dumps(profile, fmt=fmt))
+
+    endpoint, = handler.extract_dns_endpoints(parsed, "source")
+
+    assert endpoint.url == ""
+    assert endpoint.payload_identifier == "explicit"
+    assert endpoint.domains == (
+        "certs.apple.com", "ocsp.apple.com", "outside.example",
+    )
+
+
+@pytest.mark.parametrize("values", [[], ["", "*"], "ocsp.apple.com"])
+def test_empty_or_malformed_domain_list_keeps_https_probe_path(values):
+    profile = {"DNSSettings": {
+        "DNSProtocol": "HTTPS",
+        "ServerURL": "https://dns.example/dns-query",
+        "SupplementalMatchDomains": values,
+    }}
+
+    endpoint, = CryptoHandler().extract_dns_endpoints(profile, "source")
+
+    assert endpoint.domains == ()
+    assert endpoint.url == "https://dns.example/dns-query"
 
 
 def test_select_endpoint_uses_preferred_payload_identifier():
