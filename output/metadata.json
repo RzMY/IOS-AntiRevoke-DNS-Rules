@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "timestamp": "2026-09-06T01:41:08.552099Z",
+  "timestamp": "2026-09-16T02:06:11.564882Z",
   "apple_source": {
     "url": "https://support.apple.com/zh-cn/101555",
     "candidate_domains": 133
@@ -8,7 +8,7 @@
   "profile_sources": {
     "khoindvn": {
       "page_url": "https://khoindvn.io.vn/",
-      "xpath": "/html/body/main/div[1]/div/a[6]",
+      "xpath": "/html/body/main/div[1]/div/a[5]",
       "download_url": "https://github.com/dns-khoindvn/oci-auto-vm/releases/download/DNS/khoindvn.mobileconfig",
       "profile_size": 16284,
       "discovered_endpoints": [
@@ -115,57 +115,27 @@
   },
   "reference_doh_url": "https://cloudflare-dns.com/dns-query",
   "normal_discovery": {
-    "target_domains": 13,
+    "target_domains": 7,
     "blocked_by": {
-      "app-site-association.networking.apple": [
-        "khoindvn"
-      ],
       "appattest.apple.com": [
-        "applejr",
-        "khoindvn",
         "sideloading"
       ],
       "certs.apple.com": [
-        "applejr",
-        "khoindvn",
         "sideloading"
       ],
       "crl.apple.com": [
-        "applejr",
-        "khoindvn",
         "sideloading"
-      ],
-      "crl3.digicert.com": [
-        "khoindvn"
-      ],
-      "crl4.digicert.com": [
-        "khoindvn"
-      ],
-      "idv.cdn-apple.com": [
-        "khoindvn"
-      ],
-      "metrics.icloud.com": [
-        "applejr"
       ],
       "ocsp.apple.com": [
-        "applejr",
-        "khoindvn",
         "sideloading"
       ],
-      "ocsp.digicert.com": [
-        "khoindvn"
-      ],
       "ocsp2.apple.com": [
-        "applejr",
-        "khoindvn",
         "sideloading"
       ],
       "valid.apple.com": [
-        "applejr",
         "sideloading"
       ],
       "vpp.itunes.apple.com": [
-        "applejr",
         "sideloading"
       ]
     },
@@ -185,14 +155,12 @@
     ],
     "endpoint_stats": {
       "khoindvn": {
-        "invalid_address": 10,
-        "negative": 12,
-        "valid": 111
+        "negative": 13,
+        "valid": 120
       },
       "applejr": {
-        "invalid_address": 8,
-        "negative": 12,
-        "valid": 113
+        "negative": 13,
+        "valid": 120
       },
       "sideloading": {
         "invalid_address": 7,
@@ -200,7 +168,7 @@
         "valid": 114
       }
     },
-    "reference_queries": 12
+    "reference_queries": 13
   },
   "enhanced_discovery": {
     "endpoint_target_domains": 8,
@@ -208,7 +176,7 @@
     "extra_domain_list": [
       "ppq.apple.com"
     ],
-    "merged_profile_domains": 14,
+    "merged_profile_domains": 8,
     "blocked_by": {
       "appattest.apple.com": [
         "sideloading"
