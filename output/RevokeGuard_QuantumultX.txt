@@ -1,14 +1,20 @@
 # Project: iOS-AntiRevoke-DNS-Rules
 # Author: RzMY
-# Updated: 2026-09-16 02:06:11 UTC
-# Domain Count: 7
+# Updated: 2026-09-19 05:04:27 UTC
+# Domain Count: 13
 # License: MIT License
 # Format: host, domain, action
 
 host, appattest.apple.com, reject
 host, certs.apple.com, reject
 host, crl.apple.com, reject
+host, crl3.digicert.com, reject
+host, crl4.digicert.com, reject
+host, khoindvn.com, reject
 host, ocsp.apple.com, reject
+host, ocsp.digicert.cn, reject
+host, ocsp.digicert.com, reject
 host, ocsp2.apple.com, reject
 host, valid.apple.com, reject
 host, vpp.itunes.apple.com, reject
+host, vuvankhoi.com, reject

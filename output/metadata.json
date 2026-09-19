@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "timestamp": "2026-09-16T02:06:11.564882Z",
+  "timestamp": "2026-09-19T05:04:27.870763Z",
   "apple_source": {
     "url": "https://support.apple.com/zh-cn/101555",
     "candidate_domains": 133
@@ -10,20 +10,46 @@
       "page_url": "https://khoindvn.io.vn/",
       "xpath": "/html/body/main/div[1]/div/a[5]",
       "download_url": "https://github.com/dns-khoindvn/oci-auto-vm/releases/download/DNS/khoindvn.mobileconfig",
-      "profile_size": 16284,
+      "profile_size": 17082,
       "discovered_endpoints": [
         {
           "source": "khoindvn",
-          "url": "https://qhlfy08c6u.cloudflare-gateway.com/dns-query",
-          "payload_identifier": "com.apple.dnsSettings.managed.bf38e538-86b3-4ec9-8ab2-2d51bb6bb3a7",
-          "display_name": "Anti Revoke"
+          "url": "https://khoindvn.io.vn",
+          "payload_identifier": "com.apple.dnsSettings.managed.a6c41f92-7e35-4b08-bd63-19f2a5c870de",
+          "display_name": "Anti Revoke",
+          "domains": [
+            "certs.apple.com",
+            "crl.apple.com",
+            "crl3.digicert.com",
+            "crl4.digicert.com",
+            "khoindvn.com",
+            "ocsp.apple.com",
+            "ocsp.digicert.cn",
+            "ocsp.digicert.com",
+            "ocsp2.apple.com",
+            "valid.apple.com",
+            "vuvankhoi.com"
+          ]
         }
       ],
       "selected_endpoint": {
         "source": "khoindvn",
-        "url": "https://qhlfy08c6u.cloudflare-gateway.com/dns-query",
-        "payload_identifier": "com.apple.dnsSettings.managed.bf38e538-86b3-4ec9-8ab2-2d51bb6bb3a7",
-        "display_name": "Anti Revoke"
+        "url": "https://khoindvn.io.vn",
+        "payload_identifier": "com.apple.dnsSettings.managed.a6c41f92-7e35-4b08-bd63-19f2a5c870de",
+        "display_name": "Anti Revoke",
+        "domains": [
+          "certs.apple.com",
+          "crl.apple.com",
+          "crl3.digicert.com",
+          "crl4.digicert.com",
+          "khoindvn.com",
+          "ocsp.apple.com",
+          "ocsp.digicert.cn",
+          "ocsp.digicert.com",
+          "ocsp2.apple.com",
+          "valid.apple.com",
+          "vuvankhoi.com"
+        ]
       },
       "enhanced_endpoint": null
     },
@@ -37,14 +63,16 @@
           "source": "applejr",
           "url": "https://vevrl9air2.cloudflare-gateway.com/dns-query",
           "payload_identifier": "net.applejr.dns.global.bf6eda5f-2b11-4559-8249-28db1689552a",
-          "display_name": "AppleJr Anti Revoke"
+          "display_name": "AppleJr Anti Revoke",
+          "domains": []
         }
       ],
       "selected_endpoint": {
         "source": "applejr",
         "url": "https://vevrl9air2.cloudflare-gateway.com/dns-query",
         "payload_identifier": "net.applejr.dns.global.bf6eda5f-2b11-4559-8249-28db1689552a",
-        "display_name": "AppleJr Anti Revoke"
+        "display_name": "AppleJr Anti Revoke",
+        "domains": []
       },
       "enhanced_endpoint": null
     },
@@ -58,85 +86,129 @@
           "source": "sideloading",
           "url": "https://novadns-dynamic.novadev.vip/dns-query",
           "payload_identifier": "novadev.nexdns.dynamic",
-          "display_name": "NexDNS Dynamic"
+          "display_name": "NexDNS Dynamic",
+          "domains": []
         },
         {
           "source": "sideloading",
           "url": "https://novadns.novadev.vip/dns-query",
           "payload_identifier": "novadev.nexdns.whileinstalling",
-          "display_name": "NexDNS - Use when installing apps"
+          "display_name": "NexDNS - Use when installing apps",
+          "domains": []
         },
         {
           "source": "sideloading",
           "url": "https://novadns-ppq.novadev.vip/dns-query",
           "payload_identifier": "novadev.nexdns.afterinstalling",
-          "display_name": "NexDNS - Use after installing apps"
+          "display_name": "NexDNS - Use after installing apps",
+          "domains": []
         }
       ],
       "selected_endpoint": {
         "source": "sideloading",
         "url": "https://novadns.novadev.vip/dns-query",
         "payload_identifier": "novadev.nexdns.whileinstalling",
-        "display_name": "NexDNS - Use when installing apps"
+        "display_name": "NexDNS - Use when installing apps",
+        "domains": []
       },
       "enhanced_endpoint": {
         "source": "sideloading",
         "url": "https://novadns-ppq.novadev.vip/dns-query",
         "payload_identifier": "novadev.nexdns.afterinstalling",
-        "display_name": "NexDNS - Use after installing apps"
+        "display_name": "NexDNS - Use after installing apps",
+        "domains": []
       }
     }
   },
   "selected_dns_endpoints": [
     {
       "source": "khoindvn",
-      "url": "https://qhlfy08c6u.cloudflare-gateway.com/dns-query",
-      "payload_identifier": "com.apple.dnsSettings.managed.bf38e538-86b3-4ec9-8ab2-2d51bb6bb3a7",
-      "display_name": "Anti Revoke"
+      "url": "https://khoindvn.io.vn",
+      "payload_identifier": "com.apple.dnsSettings.managed.a6c41f92-7e35-4b08-bd63-19f2a5c870de",
+      "display_name": "Anti Revoke",
+      "domains": [
+        "certs.apple.com",
+        "crl.apple.com",
+        "crl3.digicert.com",
+        "crl4.digicert.com",
+        "khoindvn.com",
+        "ocsp.apple.com",
+        "ocsp.digicert.cn",
+        "ocsp.digicert.com",
+        "ocsp2.apple.com",
+        "valid.apple.com",
+        "vuvankhoi.com"
+      ]
     },
     {
       "source": "applejr",
       "url": "https://vevrl9air2.cloudflare-gateway.com/dns-query",
       "payload_identifier": "net.applejr.dns.global.bf6eda5f-2b11-4559-8249-28db1689552a",
-      "display_name": "AppleJr Anti Revoke"
+      "display_name": "AppleJr Anti Revoke",
+      "domains": []
     },
     {
       "source": "sideloading",
       "url": "https://novadns.novadev.vip/dns-query",
       "payload_identifier": "novadev.nexdns.whileinstalling",
-      "display_name": "NexDNS - Use when installing apps"
+      "display_name": "NexDNS - Use when installing apps",
+      "domains": []
     }
   ],
   "enhanced_dns_endpoint": {
     "source": "sideloading",
     "url": "https://novadns-ppq.novadev.vip/dns-query",
     "payload_identifier": "novadev.nexdns.afterinstalling",
-    "display_name": "NexDNS - Use after installing apps"
+    "display_name": "NexDNS - Use after installing apps",
+    "domains": []
   },
   "reference_doh_url": "https://cloudflare-dns.com/dns-query",
   "normal_discovery": {
-    "target_domains": 7,
+    "target_domains": 13,
     "blocked_by": {
       "appattest.apple.com": [
         "sideloading"
       ],
       "certs.apple.com": [
+        "khoindvn",
         "sideloading"
       ],
       "crl.apple.com": [
+        "khoindvn",
         "sideloading"
+      ],
+      "crl3.digicert.com": [
+        "khoindvn"
+      ],
+      "crl4.digicert.com": [
+        "khoindvn"
+      ],
+      "khoindvn.com": [
+        "khoindvn"
       ],
       "ocsp.apple.com": [
+        "khoindvn",
         "sideloading"
       ],
+      "ocsp.digicert.cn": [
+        "khoindvn"
+      ],
+      "ocsp.digicert.com": [
+        "khoindvn"
+      ],
       "ocsp2.apple.com": [
+        "khoindvn",
         "sideloading"
       ],
       "valid.apple.com": [
+        "khoindvn",
         "sideloading"
       ],
       "vpp.itunes.apple.com": [
         "sideloading"
+      ],
+      "vuvankhoi.com": [
+        "khoindvn"
       ]
     },
     "inconclusive_domains": [
@@ -155,8 +227,7 @@
     ],
     "endpoint_stats": {
       "khoindvn": {
-        "negative": 13,
-        "valid": 120
+        "profile_domains": 11
       },
       "applejr": {
         "negative": 13,
@@ -176,7 +247,7 @@
     "extra_domain_list": [
       "ppq.apple.com"
     ],
-    "merged_profile_domains": 8,
+    "merged_profile_domains": 14,
     "blocked_by": {
       "appattest.apple.com": [
         "sideloading"
