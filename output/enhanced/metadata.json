@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "timestamp": "2026-09-29T03:04:40.924546Z",
+  "timestamp": "2026-09-30T02:46:29.687784Z",
   "dns_endpoint": {
     "source": "sideloading",
     "url": "https://novadns-ppq.novadev.vip/dns-query",
