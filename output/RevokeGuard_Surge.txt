@@ -1,20 +1,40 @@
 # Project: iOS-AntiRevoke-DNS-Rules
 # Author: RzMY
-# Updated: 2026-10-02 02:54:44 UTC
-# Domain Count: 13
+# Updated: 2026-10-03 02:41:16 UTC
+# Domain Count: 33
 # License: MIT License
 # Format: DOMAIN,domain,action
 
 DOMAIN,appattest.apple.com,REJECT
+DOMAIN,applejr.net,REJECT
+DOMAIN,axm-app.apple.com,REJECT
 DOMAIN,certs.apple.com,REJECT
+DOMAIN,certs.g.aaplimg.com,REJECT
+DOMAIN,comm-cohort.ess.apple.com,REJECT
+DOMAIN,comm-main.ess.apple.com,REJECT
 DOMAIN,crl.apple.com,REJECT
+DOMAIN,crl.g.aaplimg.com,REJECT
 DOMAIN,crl3.digicert.com,REJECT
 DOMAIN,crl4.digicert.com,REJECT
+DOMAIN,gdmf.apple.com,REJECT
+DOMAIN,guzzoni-apple-com.v.aaplimg.com,REJECT
 DOMAIN,khoindvn.com,REJECT
+DOMAIN,mesu.apple.com,REJECT
+DOMAIN,ocsp-a.g.aaplimg.com,REJECT
 DOMAIN,ocsp.apple.com,REJECT
 DOMAIN,ocsp.digicert.cn,REJECT
 DOMAIN,ocsp.digicert.com,REJECT
 DOMAIN,ocsp2.apple.com,REJECT
+DOMAIN,ocsp2.apple.com.edgesuite.net,REJECT
+DOMAIN,ocsp2.g.aaplimg.com,REJECT
+DOMAIN,ocsp3.apple.com,REJECT
+DOMAIN,ocsp4.apple.com,REJECT
+DOMAIN,ppq-ext.v.aaplimg.com,REJECT
+DOMAIN,ppq-st-ext.itunes.apple.com,REJECT
+DOMAIN,ppq.apple.com,REJECT
+DOMAIN,use1-ppq-ext-prod.apple.com,REJECT
+DOMAIN,usw2-ppq-ext-prod.apple.com,REJECT
+DOMAIN,valid-apple.g.aaplimg.com,REJECT
 DOMAIN,valid.apple.com,REJECT
 DOMAIN,vpp.itunes.apple.com,REJECT
 DOMAIN,vuvankhoi.com,REJECT

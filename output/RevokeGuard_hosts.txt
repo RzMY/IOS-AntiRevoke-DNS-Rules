@@ -1,20 +1,40 @@
 # Project: iOS-AntiRevoke-DNS-Rules
 # Author: RzMY
-# Updated: 2026-10-02 02:54:44 UTC
-# Domain Count: 13
+# Updated: 2026-10-03 02:41:16 UTC
+# Domain Count: 33
 # License: MIT License
 # Format: IP domain
 
 0.0.0.0 appattest.apple.com
+0.0.0.0 applejr.net
+0.0.0.0 axm-app.apple.com
 0.0.0.0 certs.apple.com
+0.0.0.0 certs.g.aaplimg.com
+0.0.0.0 comm-cohort.ess.apple.com
+0.0.0.0 comm-main.ess.apple.com
 0.0.0.0 crl.apple.com
+0.0.0.0 crl.g.aaplimg.com
 0.0.0.0 crl3.digicert.com
 0.0.0.0 crl4.digicert.com
+0.0.0.0 gdmf.apple.com
+0.0.0.0 guzzoni-apple-com.v.aaplimg.com
 0.0.0.0 khoindvn.com
+0.0.0.0 mesu.apple.com
+0.0.0.0 ocsp-a.g.aaplimg.com
 0.0.0.0 ocsp.apple.com
 0.0.0.0 ocsp.digicert.cn
 0.0.0.0 ocsp.digicert.com
 0.0.0.0 ocsp2.apple.com
+0.0.0.0 ocsp2.apple.com.edgesuite.net
+0.0.0.0 ocsp2.g.aaplimg.com
+0.0.0.0 ocsp3.apple.com
+0.0.0.0 ocsp4.apple.com
+0.0.0.0 ppq-ext.v.aaplimg.com
+0.0.0.0 ppq-st-ext.itunes.apple.com
+0.0.0.0 ppq.apple.com
+0.0.0.0 use1-ppq-ext-prod.apple.com
+0.0.0.0 usw2-ppq-ext-prod.apple.com
+0.0.0.0 valid-apple.g.aaplimg.com
 0.0.0.0 valid.apple.com
 0.0.0.0 vpp.itunes.apple.com
 0.0.0.0 vuvankhoi.com

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "timestamp": "2026-10-02T02:54:44.716567Z",
+  "timestamp": "2026-10-03T02:41:16.188426Z",
   "dns_endpoint": {
     "source": "sideloading",
     "url": "https://novadns-ppq.novadev.vip/dns-query",
@@ -8,11 +8,9 @@
     "display_name": "NexDNS - Use after installing apps",
     "domains": []
   },
-  "extra_domains": [
-    "ppq.apple.com"
-  ],
-  "extra_domain_count": 1,
-  "merged_profile_domain_count": 14,
+  "extra_domains": [],
+  "extra_domain_count": 0,
+  "merged_profile_domain_count": 33,
   "generated_files": {
     "Quantumult X": "output/enhanced/RevokeGuard_Enhanced_QuantumultX.txt",
     "Surge": "output/enhanced/RevokeGuard_Enhanced_Surge.txt",

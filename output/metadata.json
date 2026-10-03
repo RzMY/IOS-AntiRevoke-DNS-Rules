@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "timestamp": "2026-10-02T02:54:44.716567Z",
+  "timestamp": "2026-10-03T02:41:16.188426Z",
   "apple_source": {
     "url": "https://support.apple.com/zh-cn/101555",
     "candidate_domains": 133
@@ -56,23 +56,79 @@
     "applejr": {
       "page_url": "https://applejr.net/",
       "xpath": "//*[@id=\"cat-esign\"]/div[1]/a",
-      "download_url": "https://applejr.ipadownloads.com/signed/panel/AppleJr_AntiRevoke.mobileconfig",
-      "profile_size": 694848,
+      "download_url": "https://applejr.ipadownloads.com/signed/panel/AppleJr_AntiRevoke_Single.mobileconfig",
+      "profile_size": 690939,
       "discovered_endpoints": [
         {
           "source": "applejr",
-          "url": "https://vevrl9air2.cloudflare-gateway.com/dns-query",
+          "url": "https://novadns.novadev.vip/dns-query",
           "payload_identifier": "net.applejr.dns.global.bf6eda5f-2b11-4559-8249-28db1689552a",
           "display_name": "AppleJr Anti Revoke",
-          "domains": []
+          "domains": [
+            "appattest.apple.com",
+            "applejr.net",
+            "axm-app.apple.com",
+            "certs.apple.com",
+            "certs.g.aaplimg.com",
+            "comm-cohort.ess.apple.com",
+            "comm-main.ess.apple.com",
+            "crl.apple.com",
+            "crl.g.aaplimg.com",
+            "gdmf.apple.com",
+            "guzzoni-apple-com.v.aaplimg.com",
+            "mesu.apple.com",
+            "ocsp-a.g.aaplimg.com",
+            "ocsp.apple.com",
+            "ocsp2.apple.com",
+            "ocsp2.apple.com.edgesuite.net",
+            "ocsp2.g.aaplimg.com",
+            "ocsp3.apple.com",
+            "ocsp4.apple.com",
+            "ppq-ext.v.aaplimg.com",
+            "ppq-st-ext.itunes.apple.com",
+            "ppq.apple.com",
+            "use1-ppq-ext-prod.apple.com",
+            "usw2-ppq-ext-prod.apple.com",
+            "valid-apple.g.aaplimg.com",
+            "valid.apple.com",
+            "vpp.itunes.apple.com"
+          ]
         }
       ],
       "selected_endpoint": {
         "source": "applejr",
-        "url": "https://vevrl9air2.cloudflare-gateway.com/dns-query",
+        "url": "https://novadns.novadev.vip/dns-query",
         "payload_identifier": "net.applejr.dns.global.bf6eda5f-2b11-4559-8249-28db1689552a",
         "display_name": "AppleJr Anti Revoke",
-        "domains": []
+        "domains": [
+          "appattest.apple.com",
+          "applejr.net",
+          "axm-app.apple.com",
+          "certs.apple.com",
+          "certs.g.aaplimg.com",
+          "comm-cohort.ess.apple.com",
+          "comm-main.ess.apple.com",
+          "crl.apple.com",
+          "crl.g.aaplimg.com",
+          "gdmf.apple.com",
+          "guzzoni-apple-com.v.aaplimg.com",
+          "mesu.apple.com",
+          "ocsp-a.g.aaplimg.com",
+          "ocsp.apple.com",
+          "ocsp2.apple.com",
+          "ocsp2.apple.com.edgesuite.net",
+          "ocsp2.g.aaplimg.com",
+          "ocsp3.apple.com",
+          "ocsp4.apple.com",
+          "ppq-ext.v.aaplimg.com",
+          "ppq-st-ext.itunes.apple.com",
+          "ppq.apple.com",
+          "use1-ppq-ext-prod.apple.com",
+          "usw2-ppq-ext-prod.apple.com",
+          "valid-apple.g.aaplimg.com",
+          "valid.apple.com",
+          "vpp.itunes.apple.com"
+        ]
       },
       "enhanced_endpoint": null
     },
@@ -142,10 +198,38 @@
     },
     {
       "source": "applejr",
-      "url": "https://vevrl9air2.cloudflare-gateway.com/dns-query",
+      "url": "https://novadns.novadev.vip/dns-query",
       "payload_identifier": "net.applejr.dns.global.bf6eda5f-2b11-4559-8249-28db1689552a",
       "display_name": "AppleJr Anti Revoke",
-      "domains": []
+      "domains": [
+        "appattest.apple.com",
+        "applejr.net",
+        "axm-app.apple.com",
+        "certs.apple.com",
+        "certs.g.aaplimg.com",
+        "comm-cohort.ess.apple.com",
+        "comm-main.ess.apple.com",
+        "crl.apple.com",
+        "crl.g.aaplimg.com",
+        "gdmf.apple.com",
+        "guzzoni-apple-com.v.aaplimg.com",
+        "mesu.apple.com",
+        "ocsp-a.g.aaplimg.com",
+        "ocsp.apple.com",
+        "ocsp2.apple.com",
+        "ocsp2.apple.com.edgesuite.net",
+        "ocsp2.g.aaplimg.com",
+        "ocsp3.apple.com",
+        "ocsp4.apple.com",
+        "ppq-ext.v.aaplimg.com",
+        "ppq-st-ext.itunes.apple.com",
+        "ppq.apple.com",
+        "use1-ppq-ext-prod.apple.com",
+        "usw2-ppq-ext-prod.apple.com",
+        "valid-apple.g.aaplimg.com",
+        "valid.apple.com",
+        "vpp.itunes.apple.com"
+      ]
     },
     {
       "source": "sideloading",
@@ -164,18 +248,39 @@
   },
   "reference_doh_url": "https://cloudflare-dns.com/dns-query",
   "normal_discovery": {
-    "target_domains": 13,
+    "target_domains": 33,
     "blocked_by": {
       "appattest.apple.com": [
+        "applejr",
         "sideloading"
+      ],
+      "applejr.net": [
+        "applejr"
+      ],
+      "axm-app.apple.com": [
+        "applejr"
       ],
       "certs.apple.com": [
+        "applejr",
         "khoindvn",
         "sideloading"
       ],
+      "certs.g.aaplimg.com": [
+        "applejr"
+      ],
+      "comm-cohort.ess.apple.com": [
+        "applejr"
+      ],
+      "comm-main.ess.apple.com": [
+        "applejr"
+      ],
       "crl.apple.com": [
+        "applejr",
         "khoindvn",
         "sideloading"
+      ],
+      "crl.g.aaplimg.com": [
+        "applejr"
       ],
       "crl3.digicert.com": [
         "khoindvn"
@@ -183,10 +288,23 @@
       "crl4.digicert.com": [
         "khoindvn"
       ],
+      "gdmf.apple.com": [
+        "applejr"
+      ],
+      "guzzoni-apple-com.v.aaplimg.com": [
+        "applejr"
+      ],
       "khoindvn.com": [
         "khoindvn"
       ],
+      "mesu.apple.com": [
+        "applejr"
+      ],
+      "ocsp-a.g.aaplimg.com": [
+        "applejr"
+      ],
       "ocsp.apple.com": [
+        "applejr",
         "khoindvn",
         "sideloading"
       ],
@@ -197,14 +315,47 @@
         "khoindvn"
       ],
       "ocsp2.apple.com": [
+        "applejr",
         "khoindvn",
         "sideloading"
       ],
+      "ocsp2.apple.com.edgesuite.net": [
+        "applejr"
+      ],
+      "ocsp2.g.aaplimg.com": [
+        "applejr"
+      ],
+      "ocsp3.apple.com": [
+        "applejr"
+      ],
+      "ocsp4.apple.com": [
+        "applejr"
+      ],
+      "ppq-ext.v.aaplimg.com": [
+        "applejr"
+      ],
+      "ppq-st-ext.itunes.apple.com": [
+        "applejr"
+      ],
+      "ppq.apple.com": [
+        "applejr"
+      ],
+      "use1-ppq-ext-prod.apple.com": [
+        "applejr"
+      ],
+      "usw2-ppq-ext-prod.apple.com": [
+        "applejr"
+      ],
+      "valid-apple.g.aaplimg.com": [
+        "applejr"
+      ],
       "valid.apple.com": [
+        "applejr",
         "khoindvn",
         "sideloading"
       ],
       "vpp.itunes.apple.com": [
+        "applejr",
         "sideloading"
       ],
       "vuvankhoi.com": [
@@ -230,8 +381,7 @@
         "profile_domains": 11
       },
       "applejr": {
-        "negative": 13,
-        "valid": 120
+        "profile_domains": 27
       },
       "sideloading": {
         "invalid_address": 7,
@@ -239,15 +389,13 @@
         "valid": 114
       }
     },
-    "reference_queries": 13
+    "reference_queries": 12
   },
   "enhanced_discovery": {
     "endpoint_target_domains": 8,
-    "extra_domains": 1,
-    "extra_domain_list": [
-      "ppq.apple.com"
-    ],
-    "merged_profile_domains": 14,
+    "extra_domains": 0,
+    "extra_domain_list": [],
+    "merged_profile_domains": 33,
     "blocked_by": {
       "appattest.apple.com": [
         "sideloading"
