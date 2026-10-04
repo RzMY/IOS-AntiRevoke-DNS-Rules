@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "timestamp": "2026-10-03T02:41:16.188426Z",
+  "timestamp": "2026-10-04T03:12:25.748831Z",
   "apple_source": {
     "url": "https://support.apple.com/zh-cn/101555",
     "candidate_domains": 133
@@ -57,7 +57,7 @@
       "page_url": "https://applejr.net/",
       "xpath": "//*[@id=\"cat-esign\"]/div[1]/a",
       "download_url": "https://applejr.ipadownloads.com/signed/panel/AppleJr_AntiRevoke_Single.mobileconfig",
-      "profile_size": 690939,
+      "profile_size": 695678,
       "discovered_endpoints": [
         {
           "source": "applejr",
