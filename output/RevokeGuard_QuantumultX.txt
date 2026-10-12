@@ -1,7 +1,7 @@
 # Project: iOS-AntiRevoke-DNS-Rules
 # Author: RzMY
-# Updated: 2026-10-12 03:02:15 UTC
-# Domain Count: 33
+# Updated: 2026-10-12 03:54:26 UTC
+# Domain Count: 32
 # License: MIT License
 # Format: host, domain, action
 
@@ -31,7 +31,6 @@ host, ocsp3.apple.com, reject
 host, ocsp4.apple.com, reject
 host, ppq-ext.v.aaplimg.com, reject
 host, ppq-st-ext.itunes.apple.com, reject
-host, ppq.apple.com, reject
 host, use1-ppq-ext-prod.apple.com, reject
 host, usw2-ppq-ext-prod.apple.com, reject
 host, valid-apple.g.aaplimg.com, reject

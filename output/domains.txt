@@ -1,7 +1,7 @@
 # Project: iOS-AntiRevoke-DNS-Rules
 # Author: RzMY
-# Updated: 2026-10-12 03:02:15 UTC
-# Domain Count: 33
+# Updated: 2026-10-12 03:54:26 UTC
+# Domain Count: 32
 # License: MIT License
 
 appattest.apple.com
@@ -30,7 +30,6 @@ ocsp3.apple.com
 ocsp4.apple.com
 ppq-ext.v.aaplimg.com
 ppq-st-ext.itunes.apple.com
-ppq.apple.com
 use1-ppq-ext-prod.apple.com
 usw2-ppq-ext-prod.apple.com
 valid-apple.g.aaplimg.com
