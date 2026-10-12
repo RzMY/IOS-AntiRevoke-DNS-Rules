@@ -88,3 +88,9 @@ conda run -n mine python -m pytest -q
 ```
 
 Large candidate-count changes, all domains becoming targets, or one endpoint reporting mostly negative results should be treated as upstream or parser regressions rather than normal rule updates. Confirm that enhanced proxy files contain only domains absent from `output/domains.txt`, while the enhanced iOS profile contains both sets.
+
+When any source discovers `ppq.apple.com`, verify that it appears only in the enhanced proxy files and enhanced iOS profile, never in the normal artifacts. Root metadata preserves raw discovery evidence: `normal_discovery.blocked_by` may contain PPQ, while `moved_to_enhanced` records its reassignment and `published_target_domains` matches the normal output count.
+
+### PPQ classification regression (2026-10-03)
+
+Commit `f3e1bad` added direct use of explicit profile domain lists. The first affected generated output was `29e8d80`: AppleJr's selected list included `ppq.apple.com`, so the normal union included it and the previous `enhanced - normal` calculation removed it from the enhanced files. The enhanced payload was still selected and still detected PPQ. The publication policy now reserves PPQ for enhanced mode independently of which source discovers it. Tests cover explicit lists, probed results, overlapping sources, and PPQ absent from all sources.

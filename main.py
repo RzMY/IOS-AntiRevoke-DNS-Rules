@@ -24,6 +24,8 @@ APPLE_SOURCE_URL = "https://support.apple.com/zh-cn/101555"
 REFERENCE_DOH_URL = "https://cloudflare-dns.com/dns-query"
 MIN_APPLE_CANDIDATES = 100
 MAX_TARGET_RATIO = 0.5
+# Keep this rule independently toggleable even when a normal source includes it.
+ENHANCED_ONLY_DOMAINS = frozenset({"ppq.apple.com"})
 
 PROFILE_SOURCES = [
     {
@@ -209,13 +211,14 @@ class AntiRevokeOrchestrator:
         enhanced_endpoint: DnsEndpoint,
         normal_report: DomainDiscoveryReport,
         enhanced_report: DomainDiscoveryReport,
+        normal_domains: Sequence[str],
         enhanced_extra_domains: Sequence[str],
         normal_files: Dict[str, str],
         enhanced_files: Dict[str, str],
         timestamp: str,
     ) -> str:
         metadata = {
-            "schema_version": 3,
+            "schema_version": 4,
             "timestamp": timestamp,
             "apple_source": {
                 "url": APPLE_SOURCE_URL,
@@ -229,6 +232,10 @@ class AntiRevokeOrchestrator:
             "reference_doh_url": self.reference_doh_url,
             "normal_discovery": {
                 "target_domains": len(normal_report.target_domains),
+                "published_target_domains": len(normal_domains),
+                "moved_to_enhanced": sorted(
+                    set(normal_report.target_domains) - set(normal_domains)
+                ),
                 "blocked_by": normal_report.blocked_by,
                 "inconclusive_domains": list(normal_report.inconclusive_domains),
                 "endpoint_stats": normal_report.endpoint_stats,
@@ -239,7 +246,7 @@ class AntiRevokeOrchestrator:
                 "extra_domains": len(enhanced_extra_domains),
                 "extra_domain_list": list(enhanced_extra_domains),
                 "merged_profile_domains": len(
-                    set(normal_report.target_domains) | set(enhanced_extra_domains)
+                    set(normal_domains) | set(enhanced_extra_domains)
                 ),
                 "blocked_by": enhanced_report.blocked_by,
                 "inconclusive_domains": list(enhanced_report.inconclusive_domains),
@@ -299,11 +306,11 @@ class AntiRevokeOrchestrator:
         normal_domains: Sequence[str],
         enhanced_endpoint_domains: Sequence[str],
     ) -> Tuple[Tuple[str, ...], Tuple[str, ...]]:
-        normal_set = set(normal_domains)
-        enhanced_extra = tuple(
-            sorted(set(enhanced_endpoint_domains) - normal_set)
-        )
-        merged = tuple(sorted(normal_set | set(enhanced_extra)))
+        """Separate enhanced rules, reserving discovered PPQ for enhanced mode."""
+        discovered = set(normal_domains) | set(enhanced_endpoint_domains)
+        normal_set = set(normal_domains) - ENHANCED_ONLY_DOMAINS
+        enhanced_extra = tuple(sorted(discovered - normal_set))
+        merged = tuple(sorted(discovered))
         return enhanced_extra, merged
 
     def run(self, sources: Sequence[Dict[str, str]] = PROFILE_SOURCES) -> bool:
@@ -332,20 +339,23 @@ class AntiRevokeOrchestrator:
                     enhanced_report.target_domains,
                 )
             )
+            normal_domains = tuple(sorted(
+                set(merged_enhanced_domains) - set(enhanced_extra_domains)
+            ))
 
             now = datetime.now(timezone.utc)
             updated_utc = now.strftime("%Y-%m-%d %H:%M:%S UTC")
             normal_profile_path = self.generate_profile(
-                normal_report.target_domains,
+                normal_domains,
                 updated_utc,
                 self.output_dir / "RevokeGuard_Auto-Sync.mobileconfig",
                 "RevokeGuard",
             )
             normal_files = self.rule_generator.generate_all_rules(
-                list(normal_report.target_domains),
+                list(normal_domains),
                 author="RzMY",
                 updated_utc=updated_utc,
-                domain_count=len(normal_report.target_domains),
+                domain_count=len(normal_domains),
             )
             if len(normal_files) != 6:
                 raise RuntimeError(
@@ -387,6 +397,7 @@ class AntiRevokeOrchestrator:
                 enhanced_endpoint,
                 normal_report,
                 enhanced_report,
+                normal_domains,
                 enhanced_extra_domains,
                 normal_files,
                 enhanced_files,
@@ -396,7 +407,7 @@ class AntiRevokeOrchestrator:
                 "Pipeline complete: %s candidates, %s normal targets, "
                 "%s enhanced extras, metadata=%s",
                 len(candidate_domains),
-                len(normal_report.target_domains),
+                len(normal_domains),
                 len(enhanced_extra_domains),
                 metadata_path,
             )

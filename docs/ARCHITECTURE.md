@@ -19,7 +19,7 @@ Apple official host tables
             v                             v
  normal target union              enhanced endpoint targets
             |                             |
-            |              extra = enhanced - normal
+            |              partition discovered targets
             |                             |
             +---------------+-------------+
                             |
@@ -32,6 +32,8 @@ Apple official host tables
 ```
 
 Selected DNS payloads with a non-empty domain list in `DNSSettings.SupplementalMatchDomains` contribute those domains directly to their normal or enhanced result set. Their URLs are not queried, even if present. Lists are normalized and deduplicated; domains outside Apple's candidate tables are retained. Empty, catch-all, and invalid entries are ignored. Domain names in web clips, server addresses, or on-demand connection exceptions are not treated as target lists.
+
+Publication reserves `ppq.apple.com` for enhanced mode, even when a normal source's explicit list or DNS response includes it. Let `N` be the normal discovery union, `E` the enhanced discovery result, and `R` the `ENHANCED_ONLY_DOMAINS` set in `main.py`. Published normal domains are `N - R`; enhanced proxy domains are `(N ∪ E) - (N - R)`; the enhanced iOS profile contains `N ∪ E`. Reserved domains are only published when discovered in at least one source. Other overlapping domains remain normal-only proxy rules.
 
 Payloads without an explicit domain list use the probing flow above. All NXDOMAIN or empty answers are checked against a public reference DoH resolver. A probed domain is published only when the upstream answer differs from a valid public answer, or when the upstream returns a non-global address such as `0.0.0.0`.
 
@@ -81,8 +83,8 @@ The enhanced endpoint is intentionally excluded from the normal endpoint union. 
 
 - Selects normal and enhanced payloads from the decoded profiles.
 - Runs normal and enhanced discovery independently.
-- Computes `enhanced extra = enhanced endpoint targets - normal targets`.
-- Generates normal rules from normal targets.
+- Partitions discovered targets, reserving `ppq.apple.com` for enhanced mode regardless of source.
+- Generates normal rules and the normal iOS profile from normal targets minus enhanced-only domains.
 - Generates enhanced proxy rules from enhanced extras only.
 - Generates the enhanced iOS profile from `normal targets + enhanced extras`.
 
@@ -110,12 +112,13 @@ The enhanced endpoint is intentionally excluded from the normal endpoint union. 
 
 ## Metadata
 
-Root `output/metadata.json` uses schema version 3 and records:
+Root `output/metadata.json` uses schema version 4 and records:
 
 - Apple source and candidate count.
 - Every discovered profile endpoint.
 - Each payload's normalized `domains` list (empty for payloads requiring probing).
 - Selected normal endpoints and the enhanced endpoint.
 - Normal discovery details, including `profile_domains` counts for sources used directly without probing.
+- Original normal discovery count (`target_domains`) and source attribution, plus the published normal count (`published_target_domains`) and domains reassigned by publication policy (`moved_to_enhanced`).
 - Enhanced endpoint targets, additional domains, and merged profile count.
 - Normal and enhanced artifact paths.
