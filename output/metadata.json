@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "timestamp": "2026-10-14T02:29:10.674272Z",
+  "timestamp": "2026-10-16T02:00:37.268577Z",
   "apple_source": {
     "url": "https://support.apple.com/zh-cn/101555",
     "candidate_domains": 133
@@ -10,7 +10,7 @@
       "page_url": "https://khoindvn.io.vn/",
       "xpath": "/html/body/main/div[1]/div/a[5]",
       "download_url": "https://github.com/dns-khoindvn/oci-auto-vm/releases/download/DNS/khoindvn.mobileconfig",
-      "profile_size": 17082,
+      "profile_size": 17949,
       "discovered_endpoints": [
         {
           "source": "khoindvn",
@@ -19,15 +19,24 @@
           "display_name": "Anti Revoke",
           "domains": [
             "certs.apple.com",
+            "certs.apple.com.edgekey.net",
             "crl.apple.com",
+            "crl.apple.com.akadns.net",
+            "crl.apple.com.edgekey.net",
+            "crl.entrust.net",
             "crl3.digicert.com",
             "crl4.digicert.com",
             "khoindvn.com",
+            "ocsp-lb.apple.com.akadns.net",
             "ocsp.apple.com",
+            "ocsp.apple.com.edgekey.net",
             "ocsp.digicert.cn",
             "ocsp.digicert.com",
             "ocsp2.apple.com",
+            "ocsp2.apple.com.edgekey.net",
             "valid.apple.com",
+            "valid.apple.com.akadns.net",
+            "valid.apple.com.edgekey.net",
             "vuvankhoi.com"
           ]
         }
@@ -39,15 +48,24 @@
         "display_name": "Anti Revoke",
         "domains": [
           "certs.apple.com",
+          "certs.apple.com.edgekey.net",
           "crl.apple.com",
+          "crl.apple.com.akadns.net",
+          "crl.apple.com.edgekey.net",
+          "crl.entrust.net",
           "crl3.digicert.com",
           "crl4.digicert.com",
           "khoindvn.com",
+          "ocsp-lb.apple.com.akadns.net",
           "ocsp.apple.com",
+          "ocsp.apple.com.edgekey.net",
           "ocsp.digicert.cn",
           "ocsp.digicert.com",
           "ocsp2.apple.com",
+          "ocsp2.apple.com.edgekey.net",
           "valid.apple.com",
+          "valid.apple.com.akadns.net",
+          "valid.apple.com.edgekey.net",
           "vuvankhoi.com"
         ]
       },
@@ -184,15 +202,24 @@
       "display_name": "Anti Revoke",
       "domains": [
         "certs.apple.com",
+        "certs.apple.com.edgekey.net",
         "crl.apple.com",
+        "crl.apple.com.akadns.net",
+        "crl.apple.com.edgekey.net",
+        "crl.entrust.net",
         "crl3.digicert.com",
         "crl4.digicert.com",
         "khoindvn.com",
+        "ocsp-lb.apple.com.akadns.net",
         "ocsp.apple.com",
+        "ocsp.apple.com.edgekey.net",
         "ocsp.digicert.cn",
         "ocsp.digicert.com",
         "ocsp2.apple.com",
+        "ocsp2.apple.com.edgekey.net",
         "valid.apple.com",
+        "valid.apple.com.akadns.net",
+        "valid.apple.com.edgekey.net",
         "vuvankhoi.com"
       ]
     },
@@ -248,8 +275,8 @@
   },
   "reference_doh_url": "https://cloudflare-dns.com/dns-query",
   "normal_discovery": {
-    "target_domains": 33,
-    "published_target_domains": 32,
+    "target_domains": 42,
+    "published_target_domains": 41,
     "moved_to_enhanced": [
       "ppq.apple.com"
     ],
@@ -269,6 +296,9 @@
         "khoindvn",
         "sideloading"
       ],
+      "certs.apple.com.edgekey.net": [
+        "khoindvn"
+      ],
       "certs.g.aaplimg.com": [
         "applejr"
       ],
@@ -282,6 +312,15 @@
         "applejr",
         "khoindvn",
         "sideloading"
+      ],
+      "crl.apple.com.akadns.net": [
+        "khoindvn"
+      ],
+      "crl.apple.com.edgekey.net": [
+        "khoindvn"
+      ],
+      "crl.entrust.net": [
+        "khoindvn"
       ],
       "crl.g.aaplimg.com": [
         "applejr"
@@ -307,10 +346,16 @@
       "ocsp-a.g.aaplimg.com": [
         "applejr"
       ],
+      "ocsp-lb.apple.com.akadns.net": [
+        "khoindvn"
+      ],
       "ocsp.apple.com": [
         "applejr",
         "khoindvn",
         "sideloading"
+      ],
+      "ocsp.apple.com.edgekey.net": [
+        "khoindvn"
       ],
       "ocsp.digicert.cn": [
         "khoindvn"
@@ -322,6 +367,9 @@
         "applejr",
         "khoindvn",
         "sideloading"
+      ],
+      "ocsp2.apple.com.edgekey.net": [
+        "khoindvn"
       ],
       "ocsp2.apple.com.edgesuite.net": [
         "applejr"
@@ -358,6 +406,12 @@
         "khoindvn",
         "sideloading"
       ],
+      "valid.apple.com.akadns.net": [
+        "khoindvn"
+      ],
+      "valid.apple.com.edgekey.net": [
+        "khoindvn"
+      ],
       "vpp.itunes.apple.com": [
         "applejr",
         "sideloading"
@@ -382,7 +436,7 @@
     ],
     "endpoint_stats": {
       "khoindvn": {
-        "profile_domains": 11
+        "profile_domains": 20
       },
       "applejr": {
         "profile_domains": 27
@@ -401,7 +455,7 @@
     "extra_domain_list": [
       "ppq.apple.com"
     ],
-    "merged_profile_domains": 33,
+    "merged_profile_domains": 42,
     "blocked_by": {
       "appattest.apple.com": [
         "sideloading"

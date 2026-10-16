@@ -1,7 +1,7 @@
 # Project: iOS-AntiRevoke-DNS-Rules
 # Author: RzMY
-# Updated: 2026-10-14 02:29:10 UTC
-# Domain Count: 32
+# Updated: 2026-10-16 02:00:37 UTC
+# Domain Count: 41
 # License: MIT License
 # Format: DOMAIN,domain,action
 
@@ -9,10 +9,14 @@ DOMAIN,appattest.apple.com,REJECT
 DOMAIN,applejr.net,REJECT
 DOMAIN,axm-app.apple.com,REJECT
 DOMAIN,certs.apple.com,REJECT
+DOMAIN,certs.apple.com.edgekey.net,REJECT
 DOMAIN,certs.g.aaplimg.com,REJECT
 DOMAIN,comm-cohort.ess.apple.com,REJECT
 DOMAIN,comm-main.ess.apple.com,REJECT
 DOMAIN,crl.apple.com,REJECT
+DOMAIN,crl.apple.com.akadns.net,REJECT
+DOMAIN,crl.apple.com.edgekey.net,REJECT
+DOMAIN,crl.entrust.net,REJECT
 DOMAIN,crl.g.aaplimg.com,REJECT
 DOMAIN,crl3.digicert.com,REJECT
 DOMAIN,crl4.digicert.com,REJECT
@@ -21,10 +25,13 @@ DOMAIN,guzzoni-apple-com.v.aaplimg.com,REJECT
 DOMAIN,khoindvn.com,REJECT
 DOMAIN,mesu.apple.com,REJECT
 DOMAIN,ocsp-a.g.aaplimg.com,REJECT
+DOMAIN,ocsp-lb.apple.com.akadns.net,REJECT
 DOMAIN,ocsp.apple.com,REJECT
+DOMAIN,ocsp.apple.com.edgekey.net,REJECT
 DOMAIN,ocsp.digicert.cn,REJECT
 DOMAIN,ocsp.digicert.com,REJECT
 DOMAIN,ocsp2.apple.com,REJECT
+DOMAIN,ocsp2.apple.com.edgekey.net,REJECT
 DOMAIN,ocsp2.apple.com.edgesuite.net,REJECT
 DOMAIN,ocsp2.g.aaplimg.com,REJECT
 DOMAIN,ocsp3.apple.com,REJECT
@@ -35,5 +42,7 @@ DOMAIN,use1-ppq-ext-prod.apple.com,REJECT
 DOMAIN,usw2-ppq-ext-prod.apple.com,REJECT
 DOMAIN,valid-apple.g.aaplimg.com,REJECT
 DOMAIN,valid.apple.com,REJECT
+DOMAIN,valid.apple.com.akadns.net,REJECT
+DOMAIN,valid.apple.com.edgekey.net,REJECT
 DOMAIN,vpp.itunes.apple.com,REJECT
 DOMAIN,vuvankhoi.com,REJECT

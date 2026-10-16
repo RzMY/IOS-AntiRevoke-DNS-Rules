@@ -1,17 +1,21 @@
 # Project: iOS-AntiRevoke-DNS-Rules
 # Author: RzMY
-# Updated: 2026-10-14 02:29:10 UTC
-# Domain Count: 32
+# Updated: 2026-10-16 02:00:37 UTC
+# Domain Count: 41
 # License: MIT License
 
 appattest.apple.com
 applejr.net
 axm-app.apple.com
 certs.apple.com
+certs.apple.com.edgekey.net
 certs.g.aaplimg.com
 comm-cohort.ess.apple.com
 comm-main.ess.apple.com
 crl.apple.com
+crl.apple.com.akadns.net
+crl.apple.com.edgekey.net
+crl.entrust.net
 crl.g.aaplimg.com
 crl3.digicert.com
 crl4.digicert.com
@@ -20,10 +24,13 @@ guzzoni-apple-com.v.aaplimg.com
 khoindvn.com
 mesu.apple.com
 ocsp-a.g.aaplimg.com
+ocsp-lb.apple.com.akadns.net
 ocsp.apple.com
+ocsp.apple.com.edgekey.net
 ocsp.digicert.cn
 ocsp.digicert.com
 ocsp2.apple.com
+ocsp2.apple.com.edgekey.net
 ocsp2.apple.com.edgesuite.net
 ocsp2.g.aaplimg.com
 ocsp3.apple.com
@@ -34,5 +41,7 @@ use1-ppq-ext-prod.apple.com
 usw2-ppq-ext-prod.apple.com
 valid-apple.g.aaplimg.com
 valid.apple.com
+valid.apple.com.akadns.net
+valid.apple.com.edgekey.net
 vpp.itunes.apple.com
 vuvankhoi.com
