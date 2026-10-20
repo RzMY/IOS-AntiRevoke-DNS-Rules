@@ -11,10 +11,10 @@ Automatically discovers iOS anti-revoke domains and publishes DNS profiles plus 
 ## Features | 特性
 
 - Daily discovery based on [Apple's official host list](https://support.apple.com/zh-cn/101555). / 每日基于 [Apple 官方主机列表](https://support.apple.com/zh-cn/101555)更新候选域名。
-- DNS behavior is compared across Khoindvn, AppleJr and Sideloading endpoints. / 对比 Khoindvn、AppleJr 与 Sideloading 的 DNS 查询结果。
+- Domain data is collected from Khoindvn, AppleJr and Sideloading profiles and published lists. / 从 Khoindvn、AppleJr 与 Sideloading 的描述文件及公开列表收集域名数据。
 - Publishes normal and enhanced configurations separately. / 分别发布正常配置与增强配置。
 - Supports iOS/iPadOS, Quantumult X, Surge, Loon, Shadowrocket and Hosts. / 支持 iOS/iPadOS、Quantumult X、Surge、Loon、Shadowrocket 与 Hosts。
-- GitHub Actions tests, signs, verifies and commits all generated artifacts. / GitHub Actions 自动测试、签名、验签并提交产物。
+- GitHub Actions tests, validates and commits all generated artifacts. / GitHub Actions 自动测试、校验并提交产物。
 
 ## Downloads | 下载
 
@@ -26,7 +26,7 @@ Use the normal configuration for installation and daily sideloading.
 
 | Platform / 平台 | File / 文件 |
 | --- | --- |
-| iOS/iPadOS | [Install signed profile / 安装签名描述文件](https://reject.rzmy.dpdns.org/download) |
+| iOS/iPadOS | [Install profile / 安装描述文件](https://reject.rzmy.dpdns.org/download) |
 | Quantumult X | [RevokeGuard_QuantumultX.txt](https://raw.githubusercontent.com/RzMY/IOS-AntiRevoke-DNS-Rules/main/output/RevokeGuard_QuantumultX.txt) |
 | Surge | [RevokeGuard_Surge.txt](https://raw.githubusercontent.com/RzMY/IOS-AntiRevoke-DNS-Rules/main/output/RevokeGuard_Surge.txt) |
 | Loon | [RevokeGuard_Loon.txt](https://raw.githubusercontent.com/RzMY/IOS-AntiRevoke-DNS-Rules/main/output/RevokeGuard_Loon.txt) |
@@ -38,7 +38,7 @@ Use the normal configuration for installation and daily sideloading.
 
 | Platform / 平台 | File / 文件 |
 | --- | --- |
-| iOS/iPadOS | [Install signed profile / 安装签名描述文件](https://reject.rzmy.dpdns.org/download2) |
+| iOS/iPadOS | [Install profile / 安装描述文件](https://reject.rzmy.dpdns.org/download2) |
 | Quantumult X | [RevokeGuard_Enhanced_QuantumultX.txt](https://raw.githubusercontent.com/RzMY/IOS-AntiRevoke-DNS-Rules/main/output/enhanced/RevokeGuard_Enhanced_QuantumultX.txt) |
 | Surge | [RevokeGuard_Enhanced_Surge.txt](https://raw.githubusercontent.com/RzMY/IOS-AntiRevoke-DNS-Rules/main/output/enhanced/RevokeGuard_Enhanced_Surge.txt) |
 | Loon | [RevokeGuard_Enhanced_Loon.txt](https://raw.githubusercontent.com/RzMY/IOS-AntiRevoke-DNS-Rules/main/output/enhanced/RevokeGuard_Enhanced_Loon.txt) |
@@ -75,23 +75,23 @@ The daily workflow performs the following operations:
 
 1. Read candidate domains from Apple's official enterprise network page. / 从 Apple 官方企业网络页面读取候选域名。
 2. Download and decode the three upstream DNS profiles. / 下载并解析三个上游 DNS 描述文件。
-3. Use explicit `DNSSettings.SupplementalMatchDomains` lists directly as results; otherwise query the candidates through the normal endpoints below. / 若所选 payload 的 `DNSSettings.SupplementalMatchDomains` 包含域名列表，直接作为结果，不再探测该源；否则使用以下正常端点查询候选域名。
-4. Process Sideloading `afterinstalling` separately using the same list-or-probe logic and calculate its additional domains. / 按相同的域名列表或探测逻辑单独处理 Sideloading `afterinstalling`，并计算新增域名。
-5. Generate normal outputs and the isolated `output/enhanced/` set. / 生成正常产物及隔离的 `output/enhanced/` 增强产物。
+3. Use `DNSSettings.SupplementalMatchDomains` as target domains when no separate mode list is configured; otherwise use the configured plain-text deny list. / 未配置独立模式列表时，将 `DNSSettings.SupplementalMatchDomains` 直接作为目标域名；配置了纯文本 denylist 时优先使用该列表。
+4. Process Sideloading with its mode-specific `denylist.txt` and `denylist-ppq.txt` lists. The new profile’s match-domain list is a routing scope and includes allowlist entries, so it is not published directly. / 使用 Sideloading 的 `denylist.txt` 与 `denylist-ppq.txt` 分别处理普通和增强模式。新版描述文件的 match-domain 列表只是路由范围，包含 allowlist 条目，因此不会直接发布。
+5. Remove provider-owned connectivity and status-check domains, then generate normal outputs and the isolated `output/enhanced/` set. / 先移除提供商自有连通性/状态检查域名，再生成正常产物及隔离的 `output/enhanced/` 增强产物。
 
 | Source / 来源 | Mode / 模式 | Payload identifier |
 | --- | --- | --- |
 | Khoindvn | Normal / 正常 | First DNS payload with a domain list or HTTPS endpoint / 首个包含域名列表或 HTTPS 端点的 DNS payload |
 | AppleJr | Normal / 正常 | First DNS payload with a domain list or HTTPS endpoint / 首个包含域名列表或 HTTPS 端点的 DNS payload |
-| Sideloading | Normal / 正常 | `novadev.nexdns.whileinstalling` |
-| Sideloading | Enhanced / 增强 | `novadev.nexdns.afterinstalling` |
+| Sideloading | Normal / 正常 | `novadev.nexrevokedns.whileinstalling`|
+| Sideloading | Enhanced / 增强 | `novadev.nexrevokedns.afterinstalling`|
 
 ## Credits | 致谢
 
 - [Apple Support](https://support.apple.com/zh-cn/101555)
 - [Khoindvn](https://khoindvn.io.vn/)
 - [AppleJr](https://applejr.net/)
-- [Sideloading / NexDNS](https://sideloading.net/dns/)
+- [Sideloading / NexRevokeDNS](https://sideloading.net/dns/)
 
 ## License | 许可证
 

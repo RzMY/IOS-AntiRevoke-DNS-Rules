@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import re
 import time
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Tuple
 from urllib.parse import urljoin
 
 import requests
@@ -40,6 +40,8 @@ class ProfileScraper:
             }
         )
         self.download_urls: Dict[str, str] = {}
+        self.domain_lists: Dict[str, Tuple[str, ...]] = {}
+        self.enhanced_domain_lists: Dict[str, Tuple[str, ...]] = {}
 
     def _request(self, url: str) -> requests.Response:
         last_error: Optional[Exception] = None
@@ -102,9 +104,43 @@ class ProfileScraper:
 
         return content
 
+    @classmethod
+    def extract_plain_domains(cls, content: bytes) -> List[str]:
+        """Extract DNS names from a plain-text domain-list response."""
+        text = content.decode("utf-8-sig", errors="replace")
+        domains = set()
+
+        for line in text.splitlines():
+            value = line.strip()
+            if not value or value.startswith(("#", "!", "//")):
+                continue
+            matches = cls.DOMAIN_PATTERN.findall(value)
+            if not matches:
+                continue
+            domain = matches[0].lower().rstrip(".")
+            if domain.startswith("*."):
+                domain = domain[2:]
+            domains.add(domain)
+
+        return sorted(domains)
+
+    def download_domain_list(self, url: str) -> Tuple[str, ...]:
+        """Download an upstream plain-text list of target domains."""
+        response = self._request(url)
+        content_type = response.headers.get("content-type", "").lower()
+        if "text/html" in content_type:
+            raise ScrapeError(f"Domain-list URL returned HTML: {url}")
+
+        domains = tuple(self.extract_plain_domains(response.content))
+        if not domains:
+            raise ScrapeError(f"Domain-list URL yielded no domains: {url}")
+        return domains
+
     def scrape_sources(self, sources: Iterable[Dict[str, str]]) -> Dict[str, bytes]:
         profiles: Dict[str, bytes] = {}
         self.download_urls = {}
+        self.domain_lists = {}
+        self.enhanced_domain_lists = {}
 
         for source in sources:
             name = source.get("name")
@@ -117,6 +153,22 @@ class ProfileScraper:
             download_url = self._extract_download_link(page, xpath, url)
             profiles[name] = self.download_profile(download_url)
             self.download_urls[name] = download_url
+
+            for list_key, target in (
+                ("domain_list_url", self.domain_lists),
+                ("enhanced_domain_list_url", self.enhanced_domain_lists),
+            ):
+                list_url = source.get(list_key)
+                if not list_url:
+                    continue
+                target[name] = self.download_domain_list(list_url)
+                logger.info(
+                    "Loaded %s domains from %s (%s)",
+                    len(target[name]),
+                    name,
+                    list_key,
+                )
+
             logger.info("Downloaded required profile from %s", name)
 
         return profiles

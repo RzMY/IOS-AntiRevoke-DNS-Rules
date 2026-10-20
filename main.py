@@ -6,11 +6,8 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
-import shutil
 import sys
-import tempfile
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
@@ -26,6 +23,19 @@ MIN_APPLE_CANDIDATES = 100
 MAX_TARGET_RATIO = 0.5
 # Keep this rule independently toggleable even when a normal source includes it.
 ENHANCED_ONLY_DOMAINS = frozenset({"ppq.apple.com"})
+# Provider-owned domains are only used by the upstream profiles to keep the
+# provider service reachable; they are not anti-revoke targets.
+PROVIDER_ONLY_DOMAIN_SUFFIXES = (
+    "applejr.net",
+    "backloop.dev",
+    "ipadownloads.com",
+    "khoindvn.com",
+    "khoindvn.io.vn",
+    "localhost.direct",
+    "novadev.vip",
+    "sideloading.net",
+    "vuvankhoi.com",
+)
 
 PROFILE_SOURCES = [
     {
@@ -42,8 +52,21 @@ PROFILE_SOURCES = [
         "url": "https://sideloading.net/dns/",
         "xpath": "/html/body/main/div/section[1]/div[1]/a[1]",
         "name": "sideloading",
-        "preferred_payload_identifier": "novadev.nexdns.whileinstalling",
-        "enhanced_payload_identifier": "novadev.nexdns.afterinstalling",
+        "preferred_payload_identifiers": [
+            # Current NexRevokeDNS namespace, then the pre-rebrand namespace.
+            "novadev.nexrevokedns.whileinstalling",
+            "novadev.nexdns.whileinstalling",
+        ],
+        "enhanced_payload_identifiers": [
+            "novadev.nexrevokedns.afterinstalling",
+            "novadev.nexdns.afterinstalling",
+        ],
+        # The new profile routes every mode through the same match-domain set,
+        # so use the upstream mode-specific deny lists as target sets.
+        "domain_list_url": "https://sideloading.net/dns/denylist.txt",
+        "enhanced_domain_list_url": (
+            "https://sideloading.net/dns/denylist-ppq.txt"
+        ),
     },
 ]
 
@@ -59,22 +82,18 @@ class AntiRevokeOrchestrator:
 
     def __init__(
         self,
-        cert_path: Optional[str] = None,
-        key_path: Optional[str] = None,
         output_dir: str = "output",
         timeout: int = 30,
         workers: int = 20,
         reference_doh_url: str = REFERENCE_DOH_URL,
     ):
-        self.cert_path = cert_path
-        self.key_path = key_path
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.enhanced_output_dir = self.output_dir / "enhanced"
         self.enhanced_output_dir.mkdir(parents=True, exist_ok=True)
 
         self.scraper = ProfileScraper(timeout=timeout)
-        self.crypto = CryptoHandler(cert_path, key_path)
+        self.crypto = CryptoHandler()
         self.probe = DoHDomainProbe(
             reference_url=reference_doh_url,
             timeout=min(timeout, 20),
@@ -90,23 +109,98 @@ class AntiRevokeOrchestrator:
         self.source_details: Dict[str, Dict[str, object]] = {}
 
     @staticmethod
+    def _payload_identifiers(
+        source: Dict[str, str],
+        mode: str,
+    ) -> Tuple[str, ...]:
+        """Return exact payload selectors, accepting the legacy singular key."""
+        identifiers = source.get(f"{mode}_payload_identifiers")
+        if isinstance(identifiers, str):
+            return (identifiers,)
+        if isinstance(identifiers, (list, tuple)):
+            return tuple(
+                identifier
+                for identifier in identifiers
+                if isinstance(identifier, str) and identifier
+            )
+
+        identifier = source.get(f"{mode}_payload_identifier")
+        return (identifier,) if identifier else ()
+
+    @staticmethod
+    def _is_provider_domain(domain: str) -> bool:
+        """Return whether a domain belongs to an upstream provider's infrastructure."""
+        normalized = domain.strip().lower().rstrip(".")
+        return any(
+            normalized == suffix or normalized.endswith(f".{suffix}")
+            for suffix in PROVIDER_ONLY_DOMAIN_SUFFIXES
+        )
+
+    @staticmethod
+    def _filter_provider_endpoint(endpoint: DnsEndpoint) -> DnsEndpoint:
+        """Remove provider infrastructure from an explicit endpoint list."""
+        domains = tuple(
+            domain
+            for domain in endpoint.domains
+            if not AntiRevokeOrchestrator._is_provider_domain(domain)
+        )
+        return replace(endpoint, domains=domains)
+
+    @staticmethod
+    def _filter_provider_domains(
+        report: DomainDiscoveryReport,
+    ) -> Tuple[DomainDiscoveryReport, Tuple[str, ...]]:
+        """Remove provider infrastructure from a discovery report."""
+        removed = tuple(
+            domain
+            for domain in report.target_domains
+            if AntiRevokeOrchestrator._is_provider_domain(domain)
+        )
+        if not removed:
+            return report, ()
+
+        removed_set = set(removed)
+        return replace(
+            report,
+            target_domains=tuple(
+                domain
+                for domain in report.target_domains
+                if domain not in removed_set
+            ),
+            blocked_by={
+                domain: sources
+                for domain, sources in report.blocked_by.items()
+                if domain not in removed_set
+            },
+            inconclusive_domains=tuple(
+                domain
+                for domain in report.inconclusive_domains
+                if domain not in removed_set
+            ),
+        ), removed
+
+    @staticmethod
     def _select_endpoint(
         source: Dict[str, str],
         endpoints: Sequence[DnsEndpoint],
+        mode: str = "preferred",
     ) -> DnsEndpoint:
         if not endpoints:
             raise RuntimeError(
                 f"Profile {source['name']} contains no valid HTTPS DNS endpoint or domain list"
             )
 
-        preferred_identifier = source.get("preferred_payload_identifier")
-        if preferred_identifier:
+        preferred_identifiers = AntiRevokeOrchestrator._payload_identifiers(
+            source, mode
+        )
+        for preferred_identifier in preferred_identifiers:
             for endpoint in endpoints:
                 if endpoint.payload_identifier == preferred_identifier:
                     return endpoint
+        if preferred_identifiers:
             raise RuntimeError(
-                f"Profile {source['name']} no longer contains preferred payload "
-                f"{preferred_identifier}"
+                f"Profile {source['name']} no longer contains any preferred payload: "
+                f"{', '.join(preferred_identifiers)}"
             )
 
         if len(endpoints) > 1:
@@ -129,27 +223,62 @@ class AntiRevokeOrchestrator:
         for source in sources:
             name = source["name"]
             profile = self.crypto.parse_profile_bytes(profiles[name])
-            discovered = self.crypto.extract_dns_endpoints(profile, name)
+            discovered = [
+                self._filter_provider_endpoint(item)
+                for item in self.crypto.extract_dns_endpoints(profile, name)
+            ]
             endpoint = self._select_endpoint(source, discovered)
+            upstream_domains = self.scraper.domain_lists.get(name)
+            if upstream_domains:
+                endpoint = replace(
+                    endpoint,
+                    domains=tuple(
+                        sorted(
+                            domain
+                            for domain in upstream_domains
+                            if not self._is_provider_domain(domain)
+                        )
+                    ),
+                )
             selected.append(endpoint)
-            enhanced_identifier = source.get("enhanced_payload_identifier")
-            if enhanced_identifier:
+
+            enhanced_identifiers = self._payload_identifiers(source, "enhanced")
+            if enhanced_identifiers:
                 enhanced_endpoint = self._select_endpoint(
                     {
                         "name": f"{name} enhanced",
-                        "preferred_payload_identifier": enhanced_identifier,
+                        "enhanced_payload_identifiers": enhanced_identifiers,
                     },
                     discovered,
+                    mode="enhanced",
                 )
+                enhanced_upstream_domains = (
+                    self.scraper.enhanced_domain_lists.get(name)
+                )
+                if enhanced_upstream_domains:
+                    enhanced_endpoint = replace(
+                        enhanced_endpoint,
+                        domains=tuple(
+                            sorted(
+                                domain
+                                for domain in enhanced_upstream_domains
+                                if not self._is_provider_domain(domain)
+                            )
+                        ),
+                    )
             self.source_details[name] = {
                 "page_url": source["url"],
                 "xpath": source["xpath"],
                 "download_url": self.scraper.download_urls[name],
+                "domain_list_url": source.get("domain_list_url"),
+                "enhanced_domain_list_url": source.get(
+                    "enhanced_domain_list_url"
+                ),
                 "profile_size": len(profiles[name]),
                 "discovered_endpoints": [asdict(item) for item in discovered],
                 "selected_endpoint": asdict(endpoint),
                 "enhanced_endpoint": (
-                    asdict(enhanced_endpoint) if enhanced_identifier else None
+                    asdict(enhanced_endpoint) if enhanced_identifiers else None
                 ),
             }
             logger.info(
@@ -176,33 +305,19 @@ class AntiRevokeOrchestrator:
         output_path: Path,
         profile_name: str,
     ) -> str:
-        if bool(self.cert_path) != bool(self.key_path):
-            raise RuntimeError("Both SSL_CERT_PATH and SSL_KEY_PATH are required")
+        created = self.crypto.create_profile(
+            list(domains),
+            output_file=str(output_path),
+            updated_utc=updated_utc,
+            domain_count=len(domains),
+            backend_host="reject.rzmy.dpdns.org",
+            profile_name=profile_name,
+        )
+        if not created:
+            raise RuntimeError("Failed to create the iOS configuration profile")
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            plist_path = Path(temp_dir) / f"{output_path.stem}.plist"
-            created = self.crypto.create_profile(
-                list(domains),
-                output_file=str(plist_path),
-                updated_utc=updated_utc,
-                domain_count=len(domains),
-                backend_host="reject.rzmy.dpdns.org",
-                profile_name=profile_name,
-            )
-            if not created:
-                raise RuntimeError("Failed to create the iOS configuration profile")
-
-            if self.cert_path and self.key_path:
-                if not Path(self.cert_path).is_file() or not Path(self.key_path).is_file():
-                    raise RuntimeError("Configured signing certificate or key is missing")
-                signed = self.crypto.sign_profile(created, str(output_path))
-                if not signed:
-                    raise RuntimeError("Failed to sign the iOS configuration profile")
-            else:
-                shutil.copyfile(created, output_path)
-                logger.warning("No signing credentials configured; wrote unsigned mobileconfig")
-
-        return str(output_path)
+        logger.info("Wrote unsigned iOS configuration profile to %s", output_path)
+        return output_path.as_posix()
 
     def generate_metadata(
         self,
@@ -262,7 +377,7 @@ class AntiRevokeOrchestrator:
         with open(metadata_file, "w", encoding="utf-8") as file_handle:
             json.dump(metadata, file_handle, indent=2, ensure_ascii=False)
             file_handle.write("\n")
-        return str(metadata_file)
+        return metadata_file.as_posix()
 
     def generate_enhanced_metadata(
         self,
@@ -285,7 +400,7 @@ class AntiRevokeOrchestrator:
         with open(metadata_file, "w", encoding="utf-8") as file_handle:
             json.dump(metadata, file_handle, indent=2, ensure_ascii=False)
             file_handle.write("\n")
-        return str(metadata_file)
+        return metadata_file.as_posix()
 
     @staticmethod
     def _validate_report(
@@ -330,6 +445,18 @@ class AntiRevokeOrchestrator:
             enhanced_report = self.probe.discover(
                 candidate_domains, [enhanced_endpoint]
             )
+            normal_report, removed_normal = self._filter_provider_domains(
+                normal_report
+            )
+            enhanced_report, removed_enhanced = self._filter_provider_domains(
+                enhanced_report
+            )
+            if removed_normal or removed_enhanced:
+                logger.info(
+                    "Removed provider-only domains: normal=%s enhanced=%s",
+                    list(removed_normal),
+                    list(removed_enhanced),
+                )
             self._validate_report("Normal", candidate_domains, normal_report)
             self._validate_report("Enhanced", candidate_domains, enhanced_report)
 
@@ -433,8 +560,6 @@ def main() -> int:
         logging.getLogger().setLevel(logging.DEBUG)
 
     orchestrator = AntiRevokeOrchestrator(
-        cert_path=os.getenv("SSL_CERT_PATH"),
-        key_path=os.getenv("SSL_KEY_PATH"),
         output_dir=args.output_dir,
         timeout=args.timeout,
         workers=args.workers,

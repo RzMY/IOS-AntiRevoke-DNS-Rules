@@ -4,7 +4,7 @@ import plistlib
 import pytest
 
 from main import AntiRevokeOrchestrator
-from utils.dns_probe import Resolution
+from utils.dns_probe import DomainDiscoveryReport, Resolution
 
 
 @pytest.mark.parametrize("enhanced_is_explicit", [False, True])
@@ -116,3 +116,154 @@ def test_pipeline_uses_profile_domains_and_preserves_payload_modes(
     assert metadata["profile_sources"]["explicit"]["selected_endpoint"]["domains"] == sorted([
         "outside.example", "shared.example",
     ] + normal_ppq)
+
+
+def test_sideloading_mode_lists_override_routing_match_domains(tmp_path):
+    """NexRevokeDNS uses one routing list; publish only its deny lists."""
+    sources = [{
+        "name": "sideloading",
+        "url": "https://sideloading.example/dns/",
+        "xpath": "//a",
+        "preferred_payload_identifiers": [
+            "novadev.nexrevokedns.whileinstalling",
+            "novadev.nexdns.whileinstalling",
+        ],
+        "enhanced_payload_identifiers": [
+            "novadev.nexrevokedns.afterinstalling",
+            "novadev.nexdns.afterinstalling",
+        ],
+        "domain_list_url": "https://sideloading.example/dns/denylist.txt",
+        "enhanced_domain_list_url": (
+            "https://sideloading.example/dns/denylist-ppq.txt"
+        ),
+    }]
+    routing_domains = ["allowed.example", "blocked.example"]
+    profiles = {"sideloading": plistlib.dumps({"PayloadContent": [
+        {
+            "PayloadIdentifier": "novadev.nexrevokedns.whileinstalling",
+            "DNSSettings": {
+                "DNSProtocol": "HTTPS",
+                "ServerURL": "https://dns.example/dns-query",
+                "SupplementalMatchDomains": routing_domains,
+            },
+        },
+        {
+            "PayloadIdentifier": "novadev.nexrevokedns.afterinstalling",
+            "DNSSettings": {
+                "DNSProtocol": "HTTPS",
+                "ServerURL": "https://dns.example/ppq/dns-query",
+                "SupplementalMatchDomains": routing_domains,
+            },
+        },
+    ]})}
+
+    orchestrator = AntiRevokeOrchestrator(output_dir=str(tmp_path))
+    orchestrator.scraper.download_urls = {
+        "sideloading": "https://sideloading.example/dns/profile.mobileconfig"
+    }
+    orchestrator.scraper.domain_lists = {
+        "sideloading": ("blocked.example", "dns-check.novadev.vip")
+    }
+    orchestrator.scraper.enhanced_domain_lists = {
+        "sideloading": (
+            "blocked.example",
+            "ppq.apple.com",
+            "ppq-check.novadev.vip",
+        )
+    }
+
+    selected, enhanced = orchestrator.extract_selected_endpoints(profiles, sources)
+
+    assert selected[0].domains == ("blocked.example",)
+    assert enhanced.domains == ("blocked.example", "ppq.apple.com")
+    details = orchestrator.source_details["sideloading"]
+    assert details["download_url"].endswith("profile.mobileconfig")
+    assert details["domain_list_url"].endswith("denylist.txt")
+    assert details["enhanced_domain_list_url"].endswith("denylist-ppq.txt")
+    assert details["selected_endpoint"]["domains"] == ("blocked.example",)
+    assert details["enhanced_endpoint"]["domains"] == (
+        "blocked.example",
+        "ppq.apple.com",
+    )
+    assert "dns-check.novadev.vip" not in details["selected_endpoint"]["domains"]
+    assert "ppq-check.novadev.vip" not in details["enhanced_endpoint"]["domains"]
+    assert "dns-check.novadev.vip" not in details["selected_endpoint"]["domains"]
+    assert "ppq-check.novadev.vip" not in details["enhanced_endpoint"]["domains"]
+
+
+def test_generate_profile_writes_unsigned_xml_mobileconfig(tmp_path):
+    orchestrator = AntiRevokeOrchestrator(output_dir=str(tmp_path))
+    output_path = tmp_path / "RevokeGuard_Test.mobileconfig"
+
+    generated = orchestrator.generate_profile(
+        ["certs.apple.com"],
+        "2026-10-20 00:00:00 UTC",
+        output_path,
+        "RevokeGuard Test",
+    )
+
+    assert generated == output_path.as_posix()
+    assert output_path.read_bytes().lstrip().startswith(b"<?xml")
+    profile = plistlib.loads(output_path.read_bytes())
+    assert profile["PayloadType"] == "Configuration"
+    assert profile["PayloadContent"][0]["DNSSettings"][
+        "SupplementalMatchDomains"
+    ] == ["certs.apple.com"]
+
+
+def test_provider_infrastructure_domains_are_removed_from_reports():
+    provider_domains = (
+        "applejr.net",
+        "dns-check.novadev.vip",
+        "ppq-check.novadev.vip",
+        "khoindvn.com",
+        "vuvankhoi.com",
+    )
+    report = DomainDiscoveryReport(
+        target_domains=(
+            "certs.apple.com",
+            *provider_domains,
+            "ppq.apple.com",
+        ),
+        blocked_by={
+            "certs.apple.com": ("applejr",),
+            **{domain: ("source",) for domain in provider_domains},
+            "ppq.apple.com": ("sideloading",),
+        },
+        inconclusive_domains=(),
+        endpoint_stats={},
+        reference_queries=0,
+    )
+
+    filtered, removed = AntiRevokeOrchestrator._filter_provider_domains(report)
+
+    assert removed == provider_domains
+    assert filtered.target_domains == ("certs.apple.com", "ppq.apple.com")
+    assert filtered.blocked_by == {
+        "certs.apple.com": ("applejr",),
+        "ppq.apple.com": ("sideloading",),
+    }
+    assert AntiRevokeOrchestrator._is_provider_domain("applejr.net")
+    assert AntiRevokeOrchestrator._is_provider_domain("dns-check.novadev.vip")
+    assert not AntiRevokeOrchestrator._is_provider_domain("certs.apple.com")
+    assert not AntiRevokeOrchestrator._is_provider_domain("crl.digicert.com")
+
+
+def test_generate_profile_writes_unsigned_xml_mobileconfig(tmp_path):
+    orchestrator = AntiRevokeOrchestrator(output_dir=str(tmp_path))
+    output_path = tmp_path / "RevokeGuard_Test.mobileconfig"
+
+    generated = orchestrator.generate_profile(
+        ["certs.apple.com"],
+        "2026-10-20 00:00:00 UTC",
+        output_path,
+        "RevokeGuard Test",
+    )
+
+    assert generated == output_path.as_posix()
+    assert output_path.read_bytes().lstrip().startswith(b"<?xml")
+    profile = plistlib.loads(output_path.read_bytes())
+    assert profile["PayloadType"] == "Configuration"
+    assert profile["PayloadContent"][0]["DNSSettings"][
+        "SupplementalMatchDomains"
+    ] == ["certs.apple.com"]

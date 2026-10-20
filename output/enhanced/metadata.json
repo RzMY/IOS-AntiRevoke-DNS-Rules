@@ -1,18 +1,35 @@
 {
   "schema_version": 1,
-  "timestamp": "2026-10-18T01:54:05.229447Z",
+  "timestamp": "2026-10-20T08:04:16.564300Z",
   "dns_endpoint": {
     "source": "sideloading",
-    "url": "https://novadns-ppq.novadev.vip/dns-query",
-    "payload_identifier": "novadev.nexdns.afterinstalling",
-    "display_name": "NexDNS - Use after installing apps",
-    "domains": []
+    "url": "https://dns.sideloading.net/ppq/dns-query",
+    "payload_identifier": "novadev.nexrevokedns.afterinstalling",
+    "display_name": "NexRevokeDNS - Use after installing apps",
+    "domains": [
+      "appattest.apple.com",
+      "certs.apple.com",
+      "crl.apple.com",
+      "ocsp.apple.com",
+      "ocsp2.apple.com",
+      "ocsp3.apple.com",
+      "ocsp4.apple.com",
+      "ppq-ext.apple.com",
+      "ppq-ext.v.aaplimg.com",
+      "ppq-st-ext.itunes.apple.com",
+      "ppq.apple.com",
+      "use1-ppq-ext-prod.apple.com",
+      "usw2-ppq-ext-prod.apple.com",
+      "valid.apple.com",
+      "vpp.itunes.apple.com"
+    ]
   },
   "extra_domains": [
+    "ppq-ext.apple.com",
     "ppq.apple.com"
   ],
-  "extra_domain_count": 1,
-  "merged_profile_domain_count": 42,
+  "extra_domain_count": 2,
+  "merged_profile_domain_count": 40,
   "generated_files": {
     "Quantumult X": "output/enhanced/RevokeGuard_Enhanced_QuantumultX.txt",
     "Surge": "output/enhanced/RevokeGuard_Enhanced_Surge.txt",

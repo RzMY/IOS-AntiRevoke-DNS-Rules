@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "timestamp": "2026-10-18T01:54:05.229447Z",
+  "timestamp": "2026-10-20T08:04:16.564300Z",
   "apple_source": {
     "url": "https://support.apple.com/zh-cn/101555",
     "candidate_domains": 133
@@ -10,6 +10,8 @@
       "page_url": "https://khoindvn.io.vn/",
       "xpath": "/html/body/main/div[1]/div/a[5]",
       "download_url": "https://github.com/dns-khoindvn/oci-auto-vm/releases/download/DNS/khoindvn.mobileconfig",
+      "domain_list_url": null,
+      "enhanced_domain_list_url": null,
       "profile_size": 17949,
       "discovered_endpoints": [
         {
@@ -26,7 +28,6 @@
             "crl.entrust.net",
             "crl3.digicert.com",
             "crl4.digicert.com",
-            "khoindvn.com",
             "ocsp-lb.apple.com.akadns.net",
             "ocsp.apple.com",
             "ocsp.apple.com.edgekey.net",
@@ -36,8 +37,7 @@
             "ocsp2.apple.com.edgekey.net",
             "valid.apple.com",
             "valid.apple.com.akadns.net",
-            "valid.apple.com.edgekey.net",
-            "vuvankhoi.com"
+            "valid.apple.com.edgekey.net"
           ]
         }
       ],
@@ -55,7 +55,6 @@
           "crl.entrust.net",
           "crl3.digicert.com",
           "crl4.digicert.com",
-          "khoindvn.com",
           "ocsp-lb.apple.com.akadns.net",
           "ocsp.apple.com",
           "ocsp.apple.com.edgekey.net",
@@ -65,8 +64,7 @@
           "ocsp2.apple.com.edgekey.net",
           "valid.apple.com",
           "valid.apple.com.akadns.net",
-          "valid.apple.com.edgekey.net",
-          "vuvankhoi.com"
+          "valid.apple.com.edgekey.net"
         ]
       },
       "enhanced_endpoint": null
@@ -75,6 +73,8 @@
       "page_url": "https://applejr.net/",
       "xpath": "//*[@id=\"cat-esign\"]/div[1]/a",
       "download_url": "https://applejr.ipadownloads.com/signed/panel/AppleJr_AntiRevoke_Single.mobileconfig",
+      "domain_list_url": null,
+      "enhanced_domain_list_url": null,
       "profile_size": 695678,
       "discovered_endpoints": [
         {
@@ -84,7 +84,6 @@
           "display_name": "AppleJr Anti Revoke",
           "domains": [
             "appattest.apple.com",
-            "applejr.net",
             "axm-app.apple.com",
             "certs.apple.com",
             "certs.g.aaplimg.com",
@@ -120,7 +119,6 @@
         "display_name": "AppleJr Anti Revoke",
         "domains": [
           "appattest.apple.com",
-          "applejr.net",
           "axm-app.apple.com",
           "certs.apple.com",
           "certs.g.aaplimg.com",
@@ -153,44 +151,99 @@
     "sideloading": {
       "page_url": "https://sideloading.net/dns/",
       "xpath": "/html/body/main/div/section[1]/div[1]/a[1]",
-      "download_url": "https://sideloading.net/dns/nexdns.mobileconfig",
-      "profile_size": 6969,
+      "download_url": "https://sideloading.net/dns/nexrevokedns.mobileconfig",
+      "domain_list_url": "https://sideloading.net/dns/denylist.txt",
+      "enhanced_domain_list_url": "https://sideloading.net/dns/denylist-ppq.txt",
+      "profile_size": 7382,
       "discovered_endpoints": [
         {
           "source": "sideloading",
-          "url": "https://novadns-dynamic.novadev.vip/dns-query",
-          "payload_identifier": "novadev.nexdns.dynamic",
-          "display_name": "NexDNS Dynamic",
-          "domains": []
+          "url": "https://dns.sideloading.net/dns-query",
+          "payload_identifier": "novadev.nexrevokedns.whileinstalling",
+          "display_name": "NexRevokeDNS - Use when installing apps",
+          "domains": [
+            "appattest.apple.com",
+            "certs.apple.com",
+            "crl.apple.com",
+            "ocsp.apple.com",
+            "ocsp2.apple.com",
+            "ocsp3.apple.com",
+            "ocsp4.apple.com",
+            "ppq-ext.apple.com",
+            "ppq-ext.v.aaplimg.com",
+            "ppq-st-ext.itunes.apple.com",
+            "ppq.apple.com",
+            "register.appattest.apple.com",
+            "use1-ppq-ext-prod.apple.com",
+            "usw2-ppq-ext-prod.apple.com",
+            "valid.apple.com",
+            "vpp.itunes.apple.com"
+          ]
         },
         {
           "source": "sideloading",
-          "url": "https://novadns.novadev.vip/dns-query",
-          "payload_identifier": "novadev.nexdns.whileinstalling",
-          "display_name": "NexDNS - Use when installing apps",
-          "domains": []
-        },
-        {
-          "source": "sideloading",
-          "url": "https://novadns-ppq.novadev.vip/dns-query",
-          "payload_identifier": "novadev.nexdns.afterinstalling",
-          "display_name": "NexDNS - Use after installing apps",
-          "domains": []
+          "url": "https://dns.sideloading.net/ppq/dns-query",
+          "payload_identifier": "novadev.nexrevokedns.afterinstalling",
+          "display_name": "NexRevokeDNS - Use after installing apps",
+          "domains": [
+            "appattest.apple.com",
+            "certs.apple.com",
+            "crl.apple.com",
+            "ocsp.apple.com",
+            "ocsp2.apple.com",
+            "ocsp3.apple.com",
+            "ocsp4.apple.com",
+            "ppq-ext.apple.com",
+            "ppq-ext.v.aaplimg.com",
+            "ppq-st-ext.itunes.apple.com",
+            "ppq.apple.com",
+            "register.appattest.apple.com",
+            "use1-ppq-ext-prod.apple.com",
+            "usw2-ppq-ext-prod.apple.com",
+            "valid.apple.com",
+            "vpp.itunes.apple.com"
+          ]
         }
       ],
       "selected_endpoint": {
         "source": "sideloading",
-        "url": "https://novadns.novadev.vip/dns-query",
-        "payload_identifier": "novadev.nexdns.whileinstalling",
-        "display_name": "NexDNS - Use when installing apps",
-        "domains": []
+        "url": "https://dns.sideloading.net/dns-query",
+        "payload_identifier": "novadev.nexrevokedns.whileinstalling",
+        "display_name": "NexRevokeDNS - Use when installing apps",
+        "domains": [
+          "appattest.apple.com",
+          "certs.apple.com",
+          "crl.apple.com",
+          "ocsp.apple.com",
+          "ocsp2.apple.com",
+          "ocsp3.apple.com",
+          "ocsp4.apple.com",
+          "valid.apple.com",
+          "vpp.itunes.apple.com"
+        ]
       },
       "enhanced_endpoint": {
         "source": "sideloading",
-        "url": "https://novadns-ppq.novadev.vip/dns-query",
-        "payload_identifier": "novadev.nexdns.afterinstalling",
-        "display_name": "NexDNS - Use after installing apps",
-        "domains": []
+        "url": "https://dns.sideloading.net/ppq/dns-query",
+        "payload_identifier": "novadev.nexrevokedns.afterinstalling",
+        "display_name": "NexRevokeDNS - Use after installing apps",
+        "domains": [
+          "appattest.apple.com",
+          "certs.apple.com",
+          "crl.apple.com",
+          "ocsp.apple.com",
+          "ocsp2.apple.com",
+          "ocsp3.apple.com",
+          "ocsp4.apple.com",
+          "ppq-ext.apple.com",
+          "ppq-ext.v.aaplimg.com",
+          "ppq-st-ext.itunes.apple.com",
+          "ppq.apple.com",
+          "use1-ppq-ext-prod.apple.com",
+          "usw2-ppq-ext-prod.apple.com",
+          "valid.apple.com",
+          "vpp.itunes.apple.com"
+        ]
       }
     }
   },
@@ -209,7 +262,6 @@
         "crl.entrust.net",
         "crl3.digicert.com",
         "crl4.digicert.com",
-        "khoindvn.com",
         "ocsp-lb.apple.com.akadns.net",
         "ocsp.apple.com",
         "ocsp.apple.com.edgekey.net",
@@ -219,8 +271,7 @@
         "ocsp2.apple.com.edgekey.net",
         "valid.apple.com",
         "valid.apple.com.akadns.net",
-        "valid.apple.com.edgekey.net",
-        "vuvankhoi.com"
+        "valid.apple.com.edgekey.net"
       ]
     },
     {
@@ -230,7 +281,6 @@
       "display_name": "AppleJr Anti Revoke",
       "domains": [
         "appattest.apple.com",
-        "applejr.net",
         "axm-app.apple.com",
         "certs.apple.com",
         "certs.g.aaplimg.com",
@@ -260,23 +310,49 @@
     },
     {
       "source": "sideloading",
-      "url": "https://novadns.novadev.vip/dns-query",
-      "payload_identifier": "novadev.nexdns.whileinstalling",
-      "display_name": "NexDNS - Use when installing apps",
-      "domains": []
+      "url": "https://dns.sideloading.net/dns-query",
+      "payload_identifier": "novadev.nexrevokedns.whileinstalling",
+      "display_name": "NexRevokeDNS - Use when installing apps",
+      "domains": [
+        "appattest.apple.com",
+        "certs.apple.com",
+        "crl.apple.com",
+        "ocsp.apple.com",
+        "ocsp2.apple.com",
+        "ocsp3.apple.com",
+        "ocsp4.apple.com",
+        "valid.apple.com",
+        "vpp.itunes.apple.com"
+      ]
     }
   ],
   "enhanced_dns_endpoint": {
     "source": "sideloading",
-    "url": "https://novadns-ppq.novadev.vip/dns-query",
-    "payload_identifier": "novadev.nexdns.afterinstalling",
-    "display_name": "NexDNS - Use after installing apps",
-    "domains": []
+    "url": "https://dns.sideloading.net/ppq/dns-query",
+    "payload_identifier": "novadev.nexrevokedns.afterinstalling",
+    "display_name": "NexRevokeDNS - Use after installing apps",
+    "domains": [
+      "appattest.apple.com",
+      "certs.apple.com",
+      "crl.apple.com",
+      "ocsp.apple.com",
+      "ocsp2.apple.com",
+      "ocsp3.apple.com",
+      "ocsp4.apple.com",
+      "ppq-ext.apple.com",
+      "ppq-ext.v.aaplimg.com",
+      "ppq-st-ext.itunes.apple.com",
+      "ppq.apple.com",
+      "use1-ppq-ext-prod.apple.com",
+      "usw2-ppq-ext-prod.apple.com",
+      "valid.apple.com",
+      "vpp.itunes.apple.com"
+    ]
   },
   "reference_doh_url": "https://cloudflare-dns.com/dns-query",
   "normal_discovery": {
-    "target_domains": 42,
-    "published_target_domains": 41,
+    "target_domains": 39,
+    "published_target_domains": 38,
     "moved_to_enhanced": [
       "ppq.apple.com"
     ],
@@ -284,9 +360,6 @@
       "appattest.apple.com": [
         "applejr",
         "sideloading"
-      ],
-      "applejr.net": [
-        "applejr"
       ],
       "axm-app.apple.com": [
         "applejr"
@@ -337,9 +410,6 @@
       "guzzoni-apple-com.v.aaplimg.com": [
         "applejr"
       ],
-      "khoindvn.com": [
-        "khoindvn"
-      ],
       "mesu.apple.com": [
         "applejr"
       ],
@@ -378,10 +448,12 @@
         "applejr"
       ],
       "ocsp3.apple.com": [
-        "applejr"
+        "applejr",
+        "sideloading"
       ],
       "ocsp4.apple.com": [
-        "applejr"
+        "applejr",
+        "sideloading"
       ],
       "ppq-ext.v.aaplimg.com": [
         "applejr"
@@ -415,47 +487,30 @@
       "vpp.itunes.apple.com": [
         "applejr",
         "sideloading"
-      ],
-      "vuvankhoi.com": [
-        "khoindvn"
       ]
     },
-    "inconclusive_domains": [
-      "apple-dns.net",
-      "apple-livephotoskit.com",
-      "apple-mapkit.com",
-      "apps-marketplace.apple.com",
-      "apzones.com",
-      "cdn-apple.com",
-      "icloud.apple.com",
-      "iwork.apple.com",
-      "playground-assets-cdn.apple.com",
-      "playground-cdn.apple.com",
-      "push.apple.com",
-      "smoot.apple.com"
-    ],
+    "inconclusive_domains": [],
     "endpoint_stats": {
       "khoindvn": {
-        "profile_domains": 20
+        "profile_domains": 18
       },
       "applejr": {
-        "profile_domains": 27
+        "profile_domains": 26
       },
       "sideloading": {
-        "invalid_address": 7,
-        "negative": 12,
-        "valid": 114
+        "profile_domains": 9
       }
     },
-    "reference_queries": 12
+    "reference_queries": 0
   },
   "enhanced_discovery": {
-    "endpoint_target_domains": 8,
-    "extra_domains": 1,
+    "endpoint_target_domains": 15,
+    "extra_domains": 2,
     "extra_domain_list": [
+      "ppq-ext.apple.com",
       "ppq.apple.com"
     ],
-    "merged_profile_domains": 42,
+    "merged_profile_domains": 40,
     "blocked_by": {
       "appattest.apple.com": [
         "sideloading"
@@ -472,7 +527,28 @@
       "ocsp2.apple.com": [
         "sideloading"
       ],
+      "ocsp3.apple.com": [
+        "sideloading"
+      ],
+      "ocsp4.apple.com": [
+        "sideloading"
+      ],
+      "ppq-ext.apple.com": [
+        "sideloading"
+      ],
+      "ppq-ext.v.aaplimg.com": [
+        "sideloading"
+      ],
+      "ppq-st-ext.itunes.apple.com": [
+        "sideloading"
+      ],
       "ppq.apple.com": [
+        "sideloading"
+      ],
+      "use1-ppq-ext-prod.apple.com": [
+        "sideloading"
+      ],
+      "usw2-ppq-ext-prod.apple.com": [
         "sideloading"
       ],
       "valid.apple.com": [
@@ -482,28 +558,13 @@
         "sideloading"
       ]
     },
-    "inconclusive_domains": [
-      "apple-dns.net",
-      "apple-livephotoskit.com",
-      "apple-mapkit.com",
-      "apps-marketplace.apple.com",
-      "apzones.com",
-      "cdn-apple.com",
-      "icloud.apple.com",
-      "iwork.apple.com",
-      "playground-assets-cdn.apple.com",
-      "playground-cdn.apple.com",
-      "push.apple.com",
-      "smoot.apple.com"
-    ],
+    "inconclusive_domains": [],
     "endpoint_stats": {
       "sideloading": {
-        "invalid_address": 8,
-        "negative": 12,
-        "valid": 113
+        "profile_domains": 15
       }
     },
-    "reference_queries": 12
+    "reference_queries": 0
   },
   "generated_files": {
     "normal": {

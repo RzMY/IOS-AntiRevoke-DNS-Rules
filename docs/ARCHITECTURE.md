@@ -31,7 +31,9 @@ Apple official host tables
  - normal iOS profile           - iOS profile: normal + extra
 ```
 
-Selected DNS payloads with a non-empty domain list in `DNSSettings.SupplementalMatchDomains` contribute those domains directly to their normal or enhanced result set. Their URLs are not queried, even if present. Lists are normalized and deduplicated; domains outside Apple's candidate tables are retained. Empty, catch-all, and invalid entries are ignored. Domain names in web clips, server addresses, or on-demand connection exceptions are not treated as target lists.
+Selected DNS payloads with a non-empty domain list in `DNSSettings.SupplementalMatchDomains` contribute those domains directly to their normal or enhanced result set unless the source configures `domain_list_url` or `enhanced_domain_list_url`. In that case the downloaded plain-text list replaces the profile match-domain list for that mode. This matters for Sideloading, whose current profile uses one broad `SupplementalMatchDomains` routing scope that includes allowlist and helper domains. Lists are normalized and deduplicated; domains outside Apple's candidate tables are retained. Empty, catch-all, and invalid entries are ignored. Domain names in web clips, server addresses, or on-demand connection exceptions are not treated as target lists.
+
+Provider-owned domains used only for upstream connectivity or status checks (for example `applejr.net`, `*.novadev.vip`, `khoindvn.com`, and `vuvankhoi.com`) are removed from discovery reports before validation and publication. The suffixes are defined in `PROVIDER_ONLY_DOMAIN_SUFFIXES` in `main.py`.
 
 Publication reserves `ppq.apple.com` for enhanced mode, even when a normal source's explicit list or DNS response includes it. Let `N` be the normal discovery union, `E` the enhanced discovery result, and `R` the `ENHANCED_ONLY_DOMAINS` set in `main.py`. Published normal domains are `N - R`; enhanced proxy domains are `(N ∪ E) - (N - R)`; the enhanced iOS profile contains `N ∪ E`. Reserved domains are only published when discovered in at least one source. Other overlapping domains remain normal-only proxy rules.
 
@@ -41,14 +43,14 @@ Payloads without an explicit domain list use the probing flow above. All NXDOMAI
 
 The three mobileconfig files are downloaded and decoded on every run. Endpoint URLs are never hardcoded as runtime inputs; payload identifiers select the intended mode from the current profile.
 
-| Source | Role | Selection |
-| --- | --- | --- |
-| Khoindvn | Normal | First DNS payload with explicit domains or a valid HTTPS endpoint |
-| AppleJr | Normal | First DNS payload with explicit domains or a valid HTTPS endpoint |
-| Sideloading | Normal | `novadev.nexdns.whileinstalling` |
-| Sideloading | Enhanced | `novadev.nexdns.afterinstalling` |
+| Source | Role | Selection | Target domains |
+| --- | --- | --- | --- |
+| Khoindvn | Normal | First DNS payload with explicit domains or a valid HTTPS endpoint | Profile `SupplementalMatchDomains` |
+| AppleJr | Normal | First DNS payload with explicit domains or a valid HTTPS endpoint | Profile `SupplementalMatchDomains` |
+| Sideloading | Normal | `novadev.nexrevokedns.whileinstalling`, then legacy `novadev.nexdns.whileinstalling` | Upstream `denylist.txt` |
+| Sideloading | Enhanced | `novadev.nexrevokedns.afterinstalling`, then legacy `novadev.nexdns.afterinstalling` | Upstream `denylist-ppq.txt` |
 
-The enhanced endpoint is intentionally excluded from the normal endpoint union. Its contribution is calculated independently so proxy users can toggle the enhanced rule set without duplicating normal rules.
+The Sideloading profile now uses the same broad match-domain list for both modes, including allowlist and helper domains, so those match domains are not published directly. The mode-specific deny lists override them. The enhanced endpoint is intentionally excluded from the normal endpoint union. Its contribution is calculated independently so proxy users can toggle the enhanced rule set without duplicating normal rules.
 
 ## Components
 
@@ -57,14 +59,15 @@ The enhanced endpoint is intentionally excluded from the normal endpoint union. 
 - Downloads Apple host data and all required source profiles.
 - Extracts domains only from recognized `Host` or `主机` tables.
 - Resolves page XPaths to the current mobileconfig download URLs.
+- Downloads optional plain-text domain lists for sources whose profile match domains are only a routing scope.
 - Fails when a required page, link, or profile cannot be retrieved.
 
 `utils/crypto_handler.py`
 
 - Parses unsigned plist profiles or verifies CMS-signed DER mobileconfig files.
 - Extracts HTTPS DNS endpoints, explicit match-domain lists, and payload identifiers.
-- Creates separately named normal and enhanced iOS profiles.
-- Signs generated profiles with the configured certificate chain.
+- Creates separately named, unsigned normal and enhanced iOS profiles.
+- Writes XML plists using the `.mobileconfig` extension; signing credentials are not required.
 
 `utils/dns_probe.py`
 
@@ -103,12 +106,14 @@ The enhanced endpoint is intentionally excluded from the normal endpoint union. 
 
 - All three source profiles are required.
 - Both Sideloading payload identifiers must exist.
+- Configured upstream deny lists must download and contain domains.
+- Provider-owned connectivity and status-check domains are removed from the final target sets.
 - Apple must yield at least 100 candidate domains.
 - Normal and enhanced target sets must each remain below 50% of candidates.
 - Every DNS query must complete after retries.
 - Normal discovery and enhanced endpoint discovery must both produce targets.
 - All normal and enhanced artifacts must be generated.
-- GitHub Actions verifies both CMS signatures before committing.
+- GitHub Actions verifies both output mobileconfig files are valid plists before committing.
 
 ## Metadata
 
@@ -117,8 +122,14 @@ Root `output/metadata.json` uses schema version 4 and records:
 - Apple source and candidate count.
 - Every discovered profile endpoint.
 - Each payload's normalized `domains` list (empty for payloads requiring probing).
-- Selected normal endpoints and the enhanced endpoint.
-- Normal discovery details, including `profile_domains` counts for sources used directly without probing.
+- `domain_list_url` and `enhanced_domain_list_url` when a source overrides profile match domains.
+- Selected normal endpoints and the enhanced endpoint after any domain-list override.
+- Normal discovery details, including `profile_domains` counts for sources used directly without probing. Provider-only domains are absent from `target_domains` and `blocked_by`.
 - Original normal discovery count (`target_domains`) and source attribution, plus the published normal count (`published_target_domains`) and domains reassigned by publication policy (`moved_to_enhanced`).
 - Enhanced endpoint targets, additional domains, and merged profile count.
 - Normal and enhanced artifact paths.
+
+
+### Sideloading NexRevokeDNS migration (2026-10-20)
+
+The Sideloading page now serves `nexrevokedns.mobileconfig` instead of `nexdns.mobileconfig` and renamed the DNS payload identifiers from `novadev.nexdns.*` to `novadev.nexrevokedns.*`. The page XPath remains valid. Both payloads now carry the same broad `SupplementalMatchDomains` routing set and new `dns.sideloading.net` DoH URLs. That routing set includes allowlist and helper domains, so it is not used as the published target list. The source configuration downloads `denylist.txt` for normal mode and `denylist-ppq.txt` for enhanced mode and uses those mode-specific sets instead. Selector configuration accepts an ordered identifier list; the current namespace wins, with the legacy namespace retained as a rollback-compatible fallback.

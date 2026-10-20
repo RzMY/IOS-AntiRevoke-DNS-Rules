@@ -213,7 +213,7 @@ class RuleFileGenerator:
             qx_file = self.output_dir / f'{self.file_prefix}_QuantumultX.txt'
             with open(qx_file, 'w', encoding='utf-8') as f:
                 f.write(qx_rules)
-            generated_files['Quantumult X'] = str(qx_file)
+            generated_files['Quantumult X'] = qx_file.as_posix()
             logger.info(f"Generated Quantumult X rules: {qx_file}")
 
         except Exception as e:
@@ -225,7 +225,7 @@ class RuleFileGenerator:
             surge_file = self.output_dir / f'{self.file_prefix}_Surge.txt'
             with open(surge_file, 'w', encoding='utf-8') as f:
                 f.write(surge_rules)
-            generated_files['Surge'] = str(surge_file)
+            generated_files['Surge'] = surge_file.as_posix()
             logger.info(f"Generated Surge rules: {surge_file}")
 
         except Exception as e:
@@ -237,7 +237,7 @@ class RuleFileGenerator:
             loon_file = self.output_dir / f'{self.file_prefix}_Loon.txt'
             with open(loon_file, 'w', encoding='utf-8') as f:
                 f.write(loon_rules)
-            generated_files['Loon'] = str(loon_file)
+            generated_files['Loon'] = loon_file.as_posix()
             logger.info(f"Generated Loon rules: {loon_file}")
 
         except Exception as e:
@@ -249,7 +249,7 @@ class RuleFileGenerator:
             sr_file = self.output_dir / f'{self.file_prefix}_Shadowrocket.txt'
             with open(sr_file, 'w', encoding='utf-8') as f:
                 f.write(sr_rules)
-            generated_files['Shadowrocket'] = str(sr_file)
+            generated_files['Shadowrocket'] = sr_file.as_posix()
             logger.info(f"Generated Shadowrocket rules: {sr_file}")
 
         except Exception as e:
@@ -261,7 +261,7 @@ class RuleFileGenerator:
             hosts_file = self.output_dir / f'{self.file_prefix}_hosts.txt'
             with open(hosts_file, 'w', encoding='utf-8') as f:
                 f.write(hosts_rules)
-            generated_files['Hosts'] = str(hosts_file)
+            generated_files['Hosts'] = hosts_file.as_posix()
             logger.info(f"Generated Hosts file rules: {hosts_file}")
 
         except Exception as e:
@@ -278,7 +278,7 @@ class RuleFileGenerator:
                 for domain in sorted(set(domains)):
                     if domain.strip():
                         f.write(f'{domain.strip()}\n')
-            generated_files['Domain List'] = str(domain_file)
+            generated_files['Domain List'] = domain_file.as_posix()
             logger.info(f"Generated domain list: {domain_file}")
 
         except Exception as e:

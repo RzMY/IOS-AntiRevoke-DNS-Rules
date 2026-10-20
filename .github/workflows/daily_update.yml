@@ -44,25 +44,8 @@ jobs:
       - name: Run tests
         run: python -m pytest -q
 
-      - name: Write and validate signing credentials
-        env:
-          SSL_CERT: ${{ secrets.SSL_CERT }}
-          SSL_KEY: ${{ secrets.SSL_KEY }}
-        run: |
-          if [ -z "$SSL_CERT" ] || [ -z "$SSL_KEY" ]; then
-            echo "SSL_CERT and SSL_KEY secrets are required" >&2
-            exit 1
-          fi
-          printf '%s\n' "$SSL_CERT" > fullchain.pem
-          printf '%s\n' "$SSL_KEY" > privkey.pem
-          chmod 600 fullchain.pem privkey.pem
-          openssl x509 -in fullchain.pem -noout -subject
-          openssl pkey -in privkey.pem -check -noout
-
       - name: Run discovery and generation pipeline
         env:
-          SSL_CERT_PATH: fullchain.pem
-          SSL_KEY_PATH: privkey.pem
           DEBUG_MODE: ${{ inputs.debug || false }}
         run: |
           if [ "$DEBUG_MODE" = "true" ]; then
@@ -89,20 +72,20 @@ jobs:
           test -s output/enhanced/RevokeGuard_Enhanced_hosts.txt
           test -s output/enhanced/enhanced-domains.txt
           test -s output/enhanced/metadata.json
-          openssl smime -verify \
-            -inform DER \
-            -in output/RevokeGuard_Auto-Sync.mobileconfig \
-            -noverify \
-            -out /dev/null
-          openssl smime -verify \
-            -inform DER \
-            -in output/enhanced/RevokeGuard_Enhanced.mobileconfig \
-            -noverify \
-            -out /dev/null
+          python - <<'PY'
+          import plistlib
+          from pathlib import Path
 
-      - name: Remove signing credentials
-        if: always()
-        run: rm -f fullchain.pem privkey.pem
+          for path in (
+              Path("output/RevokeGuard_Auto-Sync.mobileconfig"),
+              Path("output/enhanced/RevokeGuard_Enhanced.mobileconfig"),
+          ):
+              with path.open("rb") as file_handle:
+                  profile = plistlib.load(file_handle)
+              assert profile["PayloadType"] == "Configuration"
+              assert profile["PayloadContent"][0]["DNSSettings"]["SupplementalMatchDomains"]
+          print("Generated mobileconfig files are valid unsigned plists")
+          PY
 
       - name: Check for output changes
         id: changes

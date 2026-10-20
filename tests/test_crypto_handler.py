@@ -169,12 +169,49 @@ def test_build_enhanced_domain_sets_separates_extra_and_merged_domains():
     )
 
 
-def test_sideloading_payload_modes_are_explicit():
+def test_sideloading_payload_modes_are_explicit_and_accept_legacy_ids():
     source = next(item for item in PROFILE_SOURCES if item["name"] == "sideloading")
 
-    assert source["preferred_payload_identifier"] == (
-        "novadev.nexdns.whileinstalling"
+    assert source["preferred_payload_identifiers"] == [
+        "novadev.nexrevokedns.whileinstalling",
+        "novadev.nexdns.whileinstalling",
+    ]
+    assert source["enhanced_payload_identifiers"] == [
+        "novadev.nexrevokedns.afterinstalling",
+        "novadev.nexdns.afterinstalling",
+    ]
+
+
+def test_select_endpoint_prefers_current_sideloading_identifier():
+    profile = {
+        "PayloadContent": [
+            {
+                "PayloadIdentifier": "novadev.nexdns.whileinstalling",
+                "DNSSettings": {
+                    "DNSProtocol": "HTTPS",
+                    "ServerURL": "https://legacy.example/dns-query",
+                },
+            },
+            {
+                "PayloadIdentifier": "novadev.nexrevokedns.whileinstalling",
+                "DNSSettings": {
+                    "DNSProtocol": "HTTPS",
+                    "ServerURL": "https://current.example/dns-query",
+                },
+            },
+        ]
+    }
+    endpoints = CryptoHandler().extract_dns_endpoints(profile, "sideloading")
+
+    selected = AntiRevokeOrchestrator._select_endpoint(
+        {
+            "name": "sideloading",
+            "preferred_payload_identifiers": [
+                "novadev.nexrevokedns.whileinstalling",
+                "novadev.nexdns.whileinstalling",
+            ],
+        },
+        endpoints,
     )
-    assert source["enhanced_payload_identifier"] == (
-        "novadev.nexdns.afterinstalling"
-    )
+
+    assert selected.url == "https://current.example/dns-query"

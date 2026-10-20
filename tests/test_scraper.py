@@ -37,3 +37,20 @@ def test_extract_download_link_resolves_relative_url():
         '//*[@id="profile"]',
         "https://example.com/base/",
     ) == "https://example.com/base/dns/profile.mobileconfig"
+
+
+def test_extract_plain_domains_supports_host_and_adblock_lists():
+    content = b"""
+    # comment
+    ! ignored
+    ocsp.apple.com
+    ||backloop.dev^
+    *.ppq.apple.com
+    invalid line without a host
+    """
+
+    assert ProfileScraper.extract_plain_domains(content) == [
+        "backloop.dev",
+        "ocsp.apple.com",
+        "ppq.apple.com",
+    ]
