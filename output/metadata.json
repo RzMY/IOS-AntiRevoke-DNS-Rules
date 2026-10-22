@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "timestamp": "2026-10-21T02:19:45.590184Z",
+  "timestamp": "2026-10-22T02:14:33.483232Z",
   "apple_source": {
     "url": "https://support.apple.com/zh-cn/101555",
     "candidate_domains": 133
@@ -154,7 +154,7 @@
       "download_url": "https://sideloading.net/dns/nexrevokedns.mobileconfig",
       "domain_list_url": "https://sideloading.net/dns/denylist.txt",
       "enhanced_domain_list_url": "https://sideloading.net/dns/denylist-ppq.txt",
-      "profile_size": 7382,
+      "profile_size": 9060,
       "discovered_endpoints": [
         {
           "source": "sideloading",
