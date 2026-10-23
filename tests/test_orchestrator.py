@@ -3,7 +3,7 @@ import plistlib
 
 import pytest
 
-from main import AntiRevokeOrchestrator
+from main import AntiRevokeOrchestrator, PROFILE_SOURCES
 from utils.dns_probe import DomainDiscoveryReport, Resolution
 
 
@@ -118,6 +118,91 @@ def test_pipeline_uses_profile_domains_and_preserves_payload_modes(
     ] + normal_ppq)
 
 
+@pytest.mark.parametrize("fmt", [plistlib.FMT_XML, plistlib.FMT_BINARY])
+def test_current_sideloading_profile_uses_mode_lists(tmp_path, monkeypatch, fmt):
+    """Replay relevant decoded upstream fields without an external fixture file."""
+    source = next(item for item in PROFILE_SOURCES if item["name"] == "sideloading")
+    # Snapshot of the 2026-10-23 payload identifiers, endpoints, and shared
+    # routing scope. Keep this in the tracked test so clean CI checkouts work.
+    routing_domains = [
+        "appattest.apple.com", "certs.apple.com", "crl.apple.com",
+        "ocsp.apple.com", "ocsp2.apple.com", "ocsp3.apple.com",
+        "ocsp4.apple.com", "valid.apple.com", "vpp.itunes.apple.com",
+        "ppq.apple.com", "ppq-ext.apple.com", "use1-ppq-ext-prod.apple.com",
+        "usw2-ppq-ext-prod.apple.com", "ppq-ext.v.aaplimg.com",
+        "ppq-st-ext.itunes.apple.com", "dns-check.novadev.vip",
+        "ppq-check.novadev.vip", "app.localhost.direct",
+        "register.appattest.apple.com", "backloop.dev",
+    ]
+    # Enhanced comes first to ensure selection does not depend on page order.
+    profile = {"PayloadContent": [
+        {
+            "PayloadType": "com.apple.dnsSettings.managed",
+            "PayloadIdentifier": identifier,
+            "DNSSettings": {
+                "DNSProtocol": "HTTPS",
+                "ServerURL": url,
+                "SupplementalMatchDomains": routing_domains,
+            },
+        }
+        for identifier, url in (
+            (
+                "nexsideloading.nexrevokedns.afterinstall",
+                "https://dns.sideloading.net/ppq/dns-query",
+            ),
+            (
+                "nexsideloading.nexrevokedns.duringinstall",
+                "https://dns.sideloading.net/dns-query",
+            ),
+        )
+    ]}
+    orchestrator = AntiRevokeOrchestrator(output_dir=str(tmp_path))
+    monkeypatch.setattr(
+        orchestrator.scraper, "fetch_apple_domains",
+        lambda _: [f"clean{i}.example" for i in range(100)],
+    )
+    monkeypatch.setattr(
+        orchestrator.scraper, "scrape_sources",
+        lambda _: {"sideloading": plistlib.dumps(profile, fmt=fmt)},
+    )
+    orchestrator.scraper.download_urls = {
+        "sideloading": "https://sideloading.net/dns/nexrevokedns.mobileconfig"
+    }
+    orchestrator.scraper.domain_lists = {
+        "sideloading": ("ocsp.apple.com", "dns-check.novadev.vip")
+    }
+    orchestrator.scraper.enhanced_domain_lists = {
+        "sideloading": (
+            "ocsp.apple.com", "ppq.apple.com", "ppq-check.novadev.vip",
+        )
+    }
+
+    def unexpected_query(*args):
+        raise AssertionError("Explicit deny lists must not require DNS probing")
+
+    monkeypatch.setattr(orchestrator.probe, "resolve", unexpected_query)
+
+    assert orchestrator.run([source])
+    metadata = json.loads((tmp_path / "metadata.json").read_text(encoding="utf-8"))
+    normal = metadata["profile_sources"]["sideloading"]["selected_endpoint"]
+    enhanced = metadata["enhanced_dns_endpoint"]
+    assert normal["payload_identifier"] == "nexsideloading.nexrevokedns.duringinstall"
+    assert normal["url"] == "https://dns.sideloading.net/dns-query"
+    assert normal["domains"] == ["ocsp.apple.com"]
+    assert enhanced["payload_identifier"] == "nexsideloading.nexrevokedns.afterinstall"
+    assert enhanced["url"] == "https://dns.sideloading.net/ppq/dns-query"
+    assert enhanced["domains"] == ["ocsp.apple.com", "ppq.apple.com"]
+    assert metadata["enhanced_discovery"]["extra_domain_list"] == ["ppq.apple.com"]
+    normal_profile = plistlib.loads((tmp_path / "RevokeGuard_Auto-Sync.mobileconfig").read_bytes())
+    enhanced_profile = plistlib.loads((tmp_path / "enhanced/RevokeGuard_Enhanced.mobileconfig").read_bytes())
+    assert normal_profile["PayloadContent"][0]["DNSSettings"]["SupplementalMatchDomains"] == [
+        "ocsp.apple.com",
+    ]
+    assert enhanced_profile["PayloadContent"][0]["DNSSettings"]["SupplementalMatchDomains"] == [
+        "ocsp.apple.com", "ppq.apple.com",
+    ]
+
+
 def test_sideloading_mode_lists_override_routing_match_domains(tmp_path):
     """NexRevokeDNS uses one routing list; publish only its deny lists."""
     sources = [{
@@ -189,6 +274,12 @@ def test_sideloading_mode_lists_override_routing_match_domains(tmp_path):
     assert "ppq-check.novadev.vip" not in details["enhanced_endpoint"]["domains"]
     assert "dns-check.novadev.vip" not in details["selected_endpoint"]["domains"]
     assert "ppq-check.novadev.vip" not in details["enhanced_endpoint"]["domains"]
+    assert "dns-check.novadev.vip" not in details["selected_endpoint"]["domains"]
+    assert "ppq-check.novadev.vip" not in details["enhanced_endpoint"]["domains"]
+    assert "dns-check.novadev.vip" not in details["selected_endpoint"]["domains"]
+    assert "ppq-check.novadev.vip" not in details["enhanced_endpoint"]["domains"]
+    assert "dns-check.novadev.vip" not in details["selected_endpoint"]["domains"]
+    assert "ppq-check.novadev.vip" not in details["enhanced_endpoint"]["domains"]
 
 
 def test_generate_profile_writes_unsigned_xml_mobileconfig(tmp_path):
@@ -247,6 +338,66 @@ def test_provider_infrastructure_domains_are_removed_from_reports():
     assert AntiRevokeOrchestrator._is_provider_domain("dns-check.novadev.vip")
     assert not AntiRevokeOrchestrator._is_provider_domain("certs.apple.com")
     assert not AntiRevokeOrchestrator._is_provider_domain("crl.digicert.com")
+
+
+def test_generate_profile_writes_unsigned_xml_mobileconfig(tmp_path):
+    orchestrator = AntiRevokeOrchestrator(output_dir=str(tmp_path))
+    output_path = tmp_path / "RevokeGuard_Test.mobileconfig"
+
+    generated = orchestrator.generate_profile(
+        ["certs.apple.com"],
+        "2026-10-20 00:00:00 UTC",
+        output_path,
+        "RevokeGuard Test",
+    )
+
+    assert generated == output_path.as_posix()
+    assert output_path.read_bytes().lstrip().startswith(b"<?xml")
+    profile = plistlib.loads(output_path.read_bytes())
+    assert profile["PayloadType"] == "Configuration"
+    assert profile["PayloadContent"][0]["DNSSettings"][
+        "SupplementalMatchDomains"
+    ] == ["certs.apple.com"]
+
+
+def test_generate_profile_writes_unsigned_xml_mobileconfig(tmp_path):
+    orchestrator = AntiRevokeOrchestrator(output_dir=str(tmp_path))
+    output_path = tmp_path / "RevokeGuard_Test.mobileconfig"
+
+    generated = orchestrator.generate_profile(
+        ["certs.apple.com"],
+        "2026-10-20 00:00:00 UTC",
+        output_path,
+        "RevokeGuard Test",
+    )
+
+    assert generated == output_path.as_posix()
+    assert output_path.read_bytes().lstrip().startswith(b"<?xml")
+    profile = plistlib.loads(output_path.read_bytes())
+    assert profile["PayloadType"] == "Configuration"
+    assert profile["PayloadContent"][0]["DNSSettings"][
+        "SupplementalMatchDomains"
+    ] == ["certs.apple.com"]
+
+
+def test_generate_profile_writes_unsigned_xml_mobileconfig(tmp_path):
+    orchestrator = AntiRevokeOrchestrator(output_dir=str(tmp_path))
+    output_path = tmp_path / "RevokeGuard_Test.mobileconfig"
+
+    generated = orchestrator.generate_profile(
+        ["certs.apple.com"],
+        "2026-10-20 00:00:00 UTC",
+        output_path,
+        "RevokeGuard Test",
+    )
+
+    assert generated == output_path.as_posix()
+    assert output_path.read_bytes().lstrip().startswith(b"<?xml")
+    profile = plistlib.loads(output_path.read_bytes())
+    assert profile["PayloadType"] == "Configuration"
+    assert profile["PayloadContent"][0]["DNSSettings"][
+        "SupplementalMatchDomains"
+    ] == ["certs.apple.com"]
 
 
 def test_generate_profile_writes_unsigned_xml_mobileconfig(tmp_path):

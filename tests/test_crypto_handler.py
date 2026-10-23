@@ -173,45 +173,58 @@ def test_sideloading_payload_modes_are_explicit_and_accept_legacy_ids():
     source = next(item for item in PROFILE_SOURCES if item["name"] == "sideloading")
 
     assert source["preferred_payload_identifiers"] == [
+        "nexsideloading.nexrevokedns.duringinstall",
         "novadev.nexrevokedns.whileinstalling",
         "novadev.nexdns.whileinstalling",
     ]
     assert source["enhanced_payload_identifiers"] == [
+        "nexsideloading.nexrevokedns.afterinstall",
         "novadev.nexrevokedns.afterinstalling",
         "novadev.nexdns.afterinstalling",
     ]
 
 
-def test_select_endpoint_prefers_current_sideloading_identifier():
-    profile = {
-        "PayloadContent": [
-            {
-                "PayloadIdentifier": "novadev.nexdns.whileinstalling",
-                "DNSSettings": {
-                    "DNSProtocol": "HTTPS",
-                    "ServerURL": "https://legacy.example/dns-query",
-                },
+@pytest.mark.parametrize("mode", ["preferred", "enhanced"])
+@pytest.mark.parametrize("generation", [0, 1, 2])
+def test_select_endpoint_prefers_newest_available_sideloading_identifier(
+    mode, generation,
+):
+    source = next(item for item in PROFILE_SOURCES if item["name"] == "sideloading")
+    identifiers = source[f"{mode}_payload_identifiers"]
+    # Put the oldest payload first to ensure profile order cannot choose a mode.
+    profile = {"PayloadContent": [
+        {
+            "PayloadIdentifier": identifier,
+            "DNSSettings": {
+                "DNSProtocol": "HTTPS",
+                "ServerURL": f"https://dns.example/{identifier}/dns-query",
             },
-            {
-                "PayloadIdentifier": "novadev.nexrevokedns.whileinstalling",
-                "DNSSettings": {
-                    "DNSProtocol": "HTTPS",
-                    "ServerURL": "https://current.example/dns-query",
-                },
-            },
-        ]
-    }
+        }
+        for identifier in reversed(identifiers[generation:])
+    ]}
     endpoints = CryptoHandler().extract_dns_endpoints(profile, "sideloading")
 
     selected = AntiRevokeOrchestrator._select_endpoint(
-        {
-            "name": "sideloading",
-            "preferred_payload_identifiers": [
-                "novadev.nexrevokedns.whileinstalling",
-                "novadev.nexdns.whileinstalling",
-            ],
-        },
+        source,
         endpoints,
+        mode=mode,
     )
 
-    assert selected.url == "https://current.example/dns-query"
+    assert selected.payload_identifier == identifiers[generation]
+
+
+@pytest.mark.parametrize("mode", ["preferred", "enhanced"])
+def test_sideloading_missing_mode_refuses_another_payload(mode):
+    source = next(item for item in PROFILE_SOURCES if item["name"] == "sideloading")
+    other_mode = "enhanced" if mode == "preferred" else "preferred"
+    profile = {"PayloadContent": [{
+        "PayloadIdentifier": source[f"{other_mode}_payload_identifiers"][0],
+        "DNSSettings": {
+            "DNSProtocol": "HTTPS",
+            "ServerURL": "https://dns.example/dns-query",
+        },
+    }]}
+    endpoints = CryptoHandler().extract_dns_endpoints(profile, "sideloading")
+
+    with pytest.raises(RuntimeError, match="no longer contains any preferred payload"):
+        AntiRevokeOrchestrator._select_endpoint(source, endpoints, mode=mode)

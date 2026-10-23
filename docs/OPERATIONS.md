@@ -65,9 +65,9 @@ The downloaded profile has neither a usable `DNSSettings.SupplementalMatchDomain
 
 At least one upstream endpoint or the local network failed after retries. Rerun later; do not convert this condition into blocked domains.
 
-`preferred payload ... no longer exists`
+`Profile ... no longer contains any preferred payload: ...`
 
-The Sideloading profile changed payload identifiers. Inspect all `discovered_endpoints` and select both the `whileinstalling` normal mode and `afterinstalling` enhanced mode explicitly. The current NexRevokeDNS namespace is `novadev.nexrevokedns.*`; the previous `novadev.nexdns.*` identifiers remain as fallbacks.
+The Sideloading profile changed payload identifiers. Inspect the decoded profile and select both modes explicitly. As of 2026-10-23, normal mode uses `nexsideloading.nexrevokedns.duringinstall` and enhanced mode uses `nexsideloading.nexrevokedns.afterinstall`. The previous `novadev.nexrevokedns.whileinstalling` / `.afterinstalling` and `novadev.nexdns.whileinstalling` / `.afterinstalling` identifiers remain as ordered fallbacks. A failed run does not update metadata, so use the downloaded profile to inspect new identifiers rather than relying on stale `output/metadata.json`. Keep the mode-specific deny-list overrides: the broad profile routing list includes allow entries.
 
 `Domain-list URL ...`
 

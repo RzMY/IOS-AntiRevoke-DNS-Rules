@@ -83,8 +83,10 @@ The daily workflow performs the following operations:
 | --- | --- | --- |
 | Khoindvn | Normal / 正常 | First DNS payload with a domain list or HTTPS endpoint / 首个包含域名列表或 HTTPS 端点的 DNS payload |
 | AppleJr | Normal / 正常 | First DNS payload with a domain list or HTTPS endpoint / 首个包含域名列表或 HTTPS 端点的 DNS payload |
-| Sideloading | Normal / 正常 | `novadev.nexrevokedns.whileinstalling`|
-| Sideloading | Enhanced / 增强 | `novadev.nexrevokedns.afterinstalling`|
+| Sideloading | Normal / 正常 | `nexsideloading.nexrevokedns.duringinstall` |
+| Sideloading | Enhanced / 增强 | `nexsideloading.nexrevokedns.afterinstall` |
+
+Both previous `novadev.nexrevokedns.*` and `novadev.nexdns.*` payload identifiers remain supported as fallbacks. / 两代旧版 `novadev.nexrevokedns.*` 与 `novadev.nexdns.*` payload 标识仍保留兼容。
 
 ## Credits | 致谢
 

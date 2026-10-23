@@ -47,8 +47,8 @@ The three mobileconfig files are downloaded and decoded on every run. Endpoint U
 | --- | --- | --- | --- |
 | Khoindvn | Normal | First DNS payload with explicit domains or a valid HTTPS endpoint | Profile `SupplementalMatchDomains` |
 | AppleJr | Normal | First DNS payload with explicit domains or a valid HTTPS endpoint | Profile `SupplementalMatchDomains` |
-| Sideloading | Normal | `novadev.nexrevokedns.whileinstalling`, then legacy `novadev.nexdns.whileinstalling` | Upstream `denylist.txt` |
-| Sideloading | Enhanced | `novadev.nexrevokedns.afterinstalling`, then legacy `novadev.nexdns.afterinstalling` | Upstream `denylist-ppq.txt` |
+| Sideloading | Normal | `nexsideloading.nexrevokedns.duringinstall`, then legacy `novadev.nexrevokedns.whileinstalling` and `novadev.nexdns.whileinstalling` | Upstream `denylist.txt` |
+| Sideloading | Enhanced | `nexsideloading.nexrevokedns.afterinstall`, then legacy `novadev.nexrevokedns.afterinstalling` and `novadev.nexdns.afterinstalling` | Upstream `denylist-ppq.txt` |
 
 The Sideloading profile now uses the same broad match-domain list for both modes, including allowlist and helper domains, so those match domains are not published directly. The mode-specific deny lists override them. The enhanced endpoint is intentionally excluded from the normal endpoint union. Its contribution is calculated independently so proxy users can toggle the enhanced rule set without duplicating normal rules.
 
@@ -133,3 +133,7 @@ Root `output/metadata.json` uses schema version 4 and records:
 ### Sideloading NexRevokeDNS migration (2026-10-20)
 
 The Sideloading page now serves `nexrevokedns.mobileconfig` instead of `nexdns.mobileconfig` and renamed the DNS payload identifiers from `novadev.nexdns.*` to `novadev.nexrevokedns.*`. The page XPath remains valid. Both payloads now carry the same broad `SupplementalMatchDomains` routing set and new `dns.sideloading.net` DoH URLs. That routing set includes allowlist and helper domains, so it is not used as the published target list. The source configuration downloads `denylist.txt` for normal mode and `denylist-ppq.txt` for enhanced mode and uses those mode-specific sets instead. Selector configuration accepts an ordered identifier list; the current namespace wins, with the legacy namespace retained as a rollback-compatible fallback.
+
+### Sideloading NexSideloading payload migration (2026-10-23)
+
+The same CMS-signed `nexrevokedns.mobileconfig` now identifies its normal payload as `nexsideloading.nexrevokedns.duringinstall` and its enhanced payload as `nexsideloading.nexrevokedns.afterinstall`. Both the namespace and the mode suffixes changed; the page link, DoH URLs, and published deny-list URLs remain valid. These new identifiers take priority, with both previous generations retained as exact fallbacks. Unknown or missing modes still fail rather than selecting another payload by position. `test_current_sideloading_profile_uses_mode_lists` in `tests/test_orchestrator.py` embeds the relevant decoded upstream fields, exercises both modes independent of payload order, and verifies that routing-only domains are not published. The test is self-contained so a clean CI checkout does not depend on an untracked fixture file.

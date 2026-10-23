@@ -53,11 +53,13 @@ PROFILE_SOURCES = [
         "xpath": "/html/body/main/div/section[1]/div[1]/a[1]",
         "name": "sideloading",
         "preferred_payload_identifiers": [
-            # Current NexRevokeDNS namespace, then the pre-rebrand namespace.
+            # Current NexSideloading namespace, then both previous namespaces.
+            "nexsideloading.nexrevokedns.duringinstall",
             "novadev.nexrevokedns.whileinstalling",
             "novadev.nexdns.whileinstalling",
         ],
         "enhanced_payload_identifiers": [
+            "nexsideloading.nexrevokedns.afterinstall",
             "novadev.nexrevokedns.afterinstalling",
             "novadev.nexdns.afterinstalling",
         ],
