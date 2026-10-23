@@ -61,21 +61,21 @@
 			<key>PayloadDisplayName</key>
 			<string>RevokeGuard DNS Settings</string>
 			<key>PayloadIdentifier</key>
-			<string>com.revokeGuard.dns.c7fbacee-bf46-45b1-9c02-624b58ad86fa</string>
+			<string>com.revokeGuard.dns.003c210d-a661-437f-90ab-697d4af50f60</string>
 			<key>PayloadType</key>
 			<string>com.apple.dnsSettings.managed</string>
 			<key>PayloadUUID</key>
-			<string>8a791d98-055e-4e44-98fa-2da2841f5add</string>
+			<string>6d07ae59-04ac-4ea9-94cb-be09508078e6</string>
 			<key>PayloadVersion</key>
 			<integer>1</integer>
 		</dict>
 	</array>
 	<key>PayloadDescription</key>
-	<string>Auto-generated on 2026-10-22 02:14:33 UTC. Blocked Domains: 38. Backend: reject.rzmy.dpdns.org.</string>
+	<string>Auto-generated on 2026-10-23 15:42:34 UTC. Blocked Domains: 38. Backend: reject.rzmy.dpdns.org.</string>
 	<key>PayloadDisplayName</key>
-	<string>RevokeGuard 2026-10-22</string>
+	<string>RevokeGuard 2026-10-23</string>
 	<key>PayloadIdentifier</key>
-	<string>com.revokeGuard.6e3dfe27-943f-41d3-884e-b5a84ae4ded0</string>
+	<string>com.revokeGuard.177b478d-156a-4a53-8885-12ee63010ef5</string>
 	<key>PayloadOrganization</key>
 	<string>iOS-AntiRevoke-DNS-Rules</string>
 	<key>PayloadRemovalDisallowed</key>
@@ -83,7 +83,7 @@
 	<key>PayloadType</key>
 	<string>Configuration</string>
 	<key>PayloadUUID</key>
-	<string>17599236-50f9-4fb1-a4ce-46f3c5e2acef</string>
+	<string>44e716f8-09b2-49d0-9bcf-5899b1e7f14b</string>
 	<key>PayloadVersion</key>
 	<integer>1</integer>
 </dict>
