@@ -306,6 +306,7 @@ class AntiRevokeOrchestrator:
         updated_utc: str,
         output_path: Path,
         profile_name: str,
+        enhanced_domains: Optional[Sequence[str]] = None,
     ) -> str:
         created = self.crypto.create_profile(
             list(domains),
@@ -314,6 +315,9 @@ class AntiRevokeOrchestrator:
             domain_count=len(domains),
             backend_host="reject.rzmy.dpdns.org",
             profile_name=profile_name,
+            enhanced_domains=(
+                list(enhanced_domains) if enhanced_domains is not None else None
+            ),
         )
         if not created:
             raise RuntimeError("Failed to create the iOS configuration profile")
@@ -474,11 +478,12 @@ class AntiRevokeOrchestrator:
 
             now = datetime.now(timezone.utc)
             updated_utc = now.strftime("%Y-%m-%d %H:%M:%S UTC")
-            normal_profile_path = self.generate_profile(
+            profile_path = self.generate_profile(
                 normal_domains,
                 updated_utc,
                 self.output_dir / "RevokeGuard_Auto-Sync.mobileconfig",
                 "RevokeGuard",
+                enhanced_domains=merged_enhanced_domains,
             )
             normal_files = self.rule_generator.generate_all_rules(
                 list(normal_domains),
@@ -491,12 +496,6 @@ class AntiRevokeOrchestrator:
                     f"Expected 6 normal rule artifacts, generated {len(normal_files)}"
                 )
 
-            enhanced_profile_path = self.generate_profile(
-                merged_enhanced_domains,
-                updated_utc,
-                self.enhanced_output_dir / "RevokeGuard_Enhanced.mobileconfig",
-                "RevokeGuard Enhanced",
-            )
             enhanced_files = self.enhanced_rule_generator.generate_all_rules(
                 list(enhanced_extra_domains),
                 author="RzMY",
@@ -509,8 +508,8 @@ class AntiRevokeOrchestrator:
                     f"generated {len(enhanced_files)}"
                 )
 
-            normal_files["iOS Profile"] = normal_profile_path
-            enhanced_files["iOS Profile"] = enhanced_profile_path
+            normal_files["iOS Profile"] = profile_path
+            enhanced_files["iOS Profile"] = profile_path
             timestamp = now.isoformat().replace("+00:00", "Z")
             enhanced_metadata_path = self.generate_enhanced_metadata(
                 enhanced_endpoint,
@@ -531,6 +530,10 @@ class AntiRevokeOrchestrator:
                 normal_files,
                 enhanced_files,
                 timestamp,
+            )
+            # Migrate existing output directories to the single-profile contract.
+            (self.enhanced_output_dir / "RevokeGuard_Enhanced.mobileconfig").unlink(
+                missing_ok=True
             )
             logger.info(
                 "Pipeline complete: %s candidates, %s normal targets, "

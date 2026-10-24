@@ -225,10 +225,11 @@ class CryptoHandler:
         updated_utc: str = None,
         domain_count: int = None,
         backend_host: str = 'reject.rzmy.dpdns.org',
-        profile_name: str = 'RevokeGuard'
+        profile_name: str = 'RevokeGuard',
+        enhanced_domains: Optional[List[str]] = None,
     ) -> Optional[str]:
         """
-        Create a new .mobileconfig plist file with the given domains.
+        Create an unsigned profile, optionally containing both DNS modes.
 
         Args:
             domains: List of domains to include
@@ -237,6 +238,7 @@ class CryptoHandler:
             domain_count: Total number of merged domains
             backend_host: Backend host for description metadata
             profile_name: Display name prefix for the generated profile
+            enhanced_domains: Full enhanced domain set, including normal domains
 
         Returns:
             Path to created plist file or None if creation fails
@@ -283,6 +285,51 @@ class CryptoHandler:
                     }
                 ]
             }
+
+            if enhanced_domains is not None:
+                normal_set = set(domains)
+                enhanced_set = set(enhanced_domains)
+                if not normal_set or not normal_set <= enhanced_set:
+                    raise ValueError('Enhanced DNS domains must include all normal domains')
+
+                # Stable identifiers let a later download replace this profile.
+                profile['PayloadIdentifier'] = 'com.revokeGuard'
+                profile['PayloadDescription'] = (
+                    f'Auto-generated on {updated_value}. '
+                    f'Normal: {len(normal_set)} domains; '
+                    f'Enhanced: {len(enhanced_set)} domains. '
+                    'Choose Normal during installation and first launch; '
+                    'choose Enhanced afterwards in Settings > General > '
+                    f'VPN & Device Management > DNS. Backend: {backend_host}.'
+                )
+                profile['ConsentText']['default'] = (
+                    'This profile installs Normal and Enhanced DNS options. '
+                    'Select Normal when installing apps or opening them for the '
+                    'first time. Select Enhanced after a successful first launch. '
+                    'Switch back to Normal before installing another app.'
+                )
+                profile['PayloadContent'] = [
+                    {
+                        'PayloadVersion': 1,
+                        'PayloadType': 'com.apple.dnsSettings.managed',
+                        'PayloadIdentifier': f'com.revokeGuard.dns.{mode}',
+                        'PayloadUUID': str(uuid.uuid4()),
+                        'PayloadDisplayName': f'{profile_name} {label}',
+                        'PayloadDescription': description,
+                        'DNSSettings': {
+                            'DNSProtocol': 'HTTPS',
+                            'ServerURL': f'https://{backend_host}/dns-query',
+                            'SupplementalMatchDomains': sorted(mode_domains),
+                        },
+                    }
+                    for mode, label, description, mode_domains in (
+                        ('normal', 'Normal - Use during install',
+                         'Use when installing apps and for their first launch.', normal_set),
+                        ('enhanced', 'Enhanced - Use after installing',
+                         'Use after a successful first launch. Switch to Normal '
+                         'before installing another app.', enhanced_set),
+                    )
+                ]
 
             with open(output_file, 'wb') as f:
                 plistlib.dump(profile, f)

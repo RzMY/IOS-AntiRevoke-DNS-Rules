@@ -46,6 +46,8 @@ def test_pipeline_uses_profile_domains_and_preserves_payload_modes(
         f"clean{i}.example" for i in range(100)
     ]
     orchestrator = AntiRevokeOrchestrator(output_dir=str(tmp_path))
+    legacy_profile = tmp_path / "enhanced/RevokeGuard_Enhanced.mobileconfig"
+    legacy_profile.write_bytes(b"legacy standalone profile")
     monkeypatch.setattr(orchestrator.scraper, "fetch_apple_domains", lambda _: candidates)
     monkeypatch.setattr(orchestrator.scraper, "scrape_sources", lambda _: profiles)
     orchestrator.scraper.download_urls = {s["name"]: s["url"] for s in sources}
@@ -87,18 +89,23 @@ def test_pipeline_uses_profile_domains_and_preserves_payload_modes(
         "extra.example",
     ] + expected_ppq
     normal = plistlib.loads((tmp_path / "RevokeGuard_Auto-Sync.mobileconfig").read_bytes())
+    assert len(normal["PayloadContent"]) == 2
+    assert not legacy_profile.exists()
     assert "ppq.apple.com" not in normal["PayloadContent"][0]["DNSSettings"]["SupplementalMatchDomains"]
     assert "host, ppq.apple.com, reject" not in (tmp_path / "RevokeGuard_QuantumultX.txt").read_text()
     assert ("host, ppq.apple.com, reject" in (
         tmp_path / "enhanced/RevokeGuard_Enhanced_QuantumultX.txt"
     ).read_text()) == bool(expected_ppq)
-    enhanced = plistlib.loads((tmp_path / "enhanced/RevokeGuard_Enhanced.mobileconfig").read_bytes())
-    assert enhanced["PayloadContent"][0]["DNSSettings"]["SupplementalMatchDomains"] == sorted([
+    assert normal["PayloadContent"][1]["DNSSettings"]["SupplementalMatchDomains"] == sorted([
         "blocked.example", "extra.example", "outside.example", "shared.example",
     ] + expected_ppq)
     metadata = json.loads((tmp_path / "metadata.json").read_text(encoding="utf-8"))
     moved_ppq = ppq_source in {"normal", "both", "normal_probe"}
     assert metadata["schema_version"] == 4
+    for mode in ("normal", "enhanced"):
+        assert metadata["generated_files"][mode]["iOS Profile"] == (
+            tmp_path / "RevokeGuard_Auto-Sync.mobileconfig"
+        ).as_posix()
     assert metadata["normal_discovery"]["target_domains"] == 3 + int(moved_ppq)
     assert metadata["normal_discovery"]["published_target_domains"] == 3
     assert metadata["normal_discovery"]["moved_to_enhanced"] == (["ppq.apple.com"] if moved_ppq else [])
@@ -111,6 +118,9 @@ def test_pipeline_uses_profile_domains_and_preserves_payload_modes(
     enhanced_metadata = json.loads((tmp_path / "enhanced/metadata.json").read_text(encoding="utf-8"))
     assert enhanced_metadata["extra_domains"] == ["extra.example"] + expected_ppq
     assert enhanced_metadata["merged_profile_domain_count"] == 4 + len(expected_ppq)
+    assert enhanced_metadata["generated_files"]["iOS Profile"] == (
+        tmp_path / "RevokeGuard_Auto-Sync.mobileconfig"
+    ).as_posix()
     assert metadata["normal_discovery"]["blocked_by"]["shared.example"] == ["explicit", "multi"]
     assert metadata["normal_discovery"]["endpoint_stats"]["explicit"] == {"profile_domains": 2 + len(normal_ppq)}
     assert metadata["profile_sources"]["explicit"]["selected_endpoint"]["domains"] == sorted([
@@ -194,11 +204,11 @@ def test_current_sideloading_profile_uses_mode_lists(tmp_path, monkeypatch, fmt)
     assert enhanced["domains"] == ["ocsp.apple.com", "ppq.apple.com"]
     assert metadata["enhanced_discovery"]["extra_domain_list"] == ["ppq.apple.com"]
     normal_profile = plistlib.loads((tmp_path / "RevokeGuard_Auto-Sync.mobileconfig").read_bytes())
-    enhanced_profile = plistlib.loads((tmp_path / "enhanced/RevokeGuard_Enhanced.mobileconfig").read_bytes())
+    assert len(normal_profile["PayloadContent"]) == 2
     assert normal_profile["PayloadContent"][0]["DNSSettings"]["SupplementalMatchDomains"] == [
         "ocsp.apple.com",
     ]
-    assert enhanced_profile["PayloadContent"][0]["DNSSettings"]["SupplementalMatchDomains"] == [
+    assert normal_profile["PayloadContent"][1]["DNSSettings"]["SupplementalMatchDomains"] == [
         "ocsp.apple.com", "ppq.apple.com",
     ]
 

@@ -28,14 +28,20 @@ Apple official host tables
              v                             v
  output/ normal artifacts       output/enhanced/ artifacts
  - normal proxy rules           - proxy rules: extra only
- - normal iOS profile           - iOS profile: normal + extra
+             |                             |
+             +---------------+-------------+
+                             |
+                             v
+       output/RevokeGuard_Auto-Sync.mobileconfig
+       - normal DNS payload: normal domains
+       - enhanced DNS payload: normal + extra domains
 ```
 
 Selected DNS payloads with a non-empty domain list in `DNSSettings.SupplementalMatchDomains` contribute those domains directly to their normal or enhanced result set unless the source configures `domain_list_url` or `enhanced_domain_list_url`. In that case the downloaded plain-text list replaces the profile match-domain list for that mode. This matters for Sideloading, whose current profile uses one broad `SupplementalMatchDomains` routing scope that includes allowlist and helper domains. Lists are normalized and deduplicated; domains outside Apple's candidate tables are retained. Empty, catch-all, and invalid entries are ignored. Domain names in web clips, server addresses, or on-demand connection exceptions are not treated as target lists.
 
 Provider-owned domains used only for upstream connectivity or status checks (for example `applejr.net`, `*.novadev.vip`, `khoindvn.com`, and `vuvankhoi.com`) are removed from discovery reports before validation and publication. The suffixes are defined in `PROVIDER_ONLY_DOMAIN_SUFFIXES` in `main.py`.
 
-Publication reserves `ppq.apple.com` for enhanced mode, even when a normal source's explicit list or DNS response includes it. Let `N` be the normal discovery union, `E` the enhanced discovery result, and `R` the `ENHANCED_ONLY_DOMAINS` set in `main.py`. Published normal domains are `N - R`; enhanced proxy domains are `(N ∪ E) - (N - R)`; the enhanced iOS profile contains `N ∪ E`. Reserved domains are only published when discovered in at least one source. Other overlapping domains remain normal-only proxy rules.
+Publication reserves `ppq.apple.com` for enhanced mode, even when a normal source's explicit list or DNS response includes it. Let `N` be the normal discovery union, `E` the enhanced discovery result, and `R` the `ENHANCED_ONLY_DOMAINS` set in `main.py`. Published normal domains are `N - R`; enhanced proxy domains are `(N ∪ E) - (N - R)`; the enhanced DNS payload in the combined iOS profile contains `N ∪ E`. Reserved domains are only published when discovered in at least one source. Other overlapping domains remain normal-only proxy rules.
 
 Payloads without an explicit domain list use the probing flow above. All NXDOMAIN or empty answers are checked against a public reference DoH resolver. A probed domain is published only when the upstream answer differs from a valid public answer, or when the upstream returns a non-global address such as `0.0.0.0`.
 
@@ -66,7 +72,7 @@ The Sideloading profile now uses the same broad match-domain list for both modes
 
 - Parses unsigned plist profiles or verifies CMS-signed DER mobileconfig files.
 - Extracts HTTPS DNS endpoints, explicit match-domain lists, and payload identifiers.
-- Creates separately named, unsigned normal and enhanced iOS profiles.
+- Creates one unsigned iOS profile containing separately named normal and enhanced DNS payloads.
 - Writes XML plists using the `.mobileconfig` extension; signing credentials are not required.
 
 `utils/dns_probe.py`
@@ -87,20 +93,29 @@ The Sideloading profile now uses the same broad match-domain list for both modes
 - Selects normal and enhanced payloads from the decoded profiles.
 - Runs normal and enhanced discovery independently.
 - Partitions discovered targets, reserving `ppq.apple.com` for enhanced mode regardless of source.
-- Generates normal rules and the normal iOS profile from normal targets minus enhanced-only domains.
+- Generates normal rules and the profile's normal DNS payload from normal targets minus enhanced-only domains.
 - Generates enhanced proxy rules from enhanced extras only.
-- Generates the enhanced iOS profile from `normal targets + enhanced extras`.
+- Generates the same profile's enhanced DNS payload from `normal targets + enhanced extras`.
+- Removes the obsolete standalone enhanced mobileconfig after successful generation.
 
 ## Output contract
 
-`output/` contains the backward-compatible normal files and root metadata.
+`output/` contains the existing normal rule filenames, root metadata, and the single `RevokeGuard_Auto-Sync.mobileconfig`. That profile contains exactly two `com.apple.dnsSettings.managed` payloads:
+
+| Mode | Payload identifier | Display name | Domains |
+| --- | --- | --- | --- |
+| Normal | `com.revokeGuard.dns.normal` | `RevokeGuard Normal - Use during install` | Published normal domains |
+| Enhanced | `com.revokeGuard.dns.enhanced` | `RevokeGuard Enhanced - Use after installing` | Normal + enhanced extra domains |
+
+Both payloads use the existing `https://reject.rzmy.dpdns.org/dns-query` backend and retain their own `SupplementalMatchDomains`. This mirrors Sideloading's two-payload structure: users select one DNS mode in iOS Settings. The enhanced payload is a superset, not an extra-only configuration. The outer identifier is stable (`com.revokeGuard`) so future downloads can replace the combined profile; each payload has a unique UUID. Users migrating from older profiles with random identifiers must remove those old profiles once. Installation and switching instructions are in [README](../README.md#iosipados-profile-usage--描述文件使用方法).
 
 `output/enhanced/` contains:
 
-- `RevokeGuard_Enhanced.mobileconfig`: merged normal and enhanced domains.
 - `RevokeGuard_Enhanced_*.txt`: enhanced extra domains only.
 - `enhanced-domains.txt`: plain enhanced extra-domain list.
-- `metadata.json`: enhanced endpoint, extra-domain count, and merged profile count.
+- `metadata.json`: enhanced endpoint, extra-domain count, and enhanced DNS payload domain count. Its `iOS Profile` path points to the combined profile in `output/`.
+
+The former `output/enhanced/RevokeGuard_Enhanced.mobileconfig` is no longer published.
 
 ## Safety gates
 
@@ -113,7 +128,7 @@ The Sideloading profile now uses the same broad match-domain list for both modes
 - Every DNS query must complete after retries.
 - Normal discovery and enhanced endpoint discovery must both produce targets.
 - All normal and enhanced artifacts must be generated.
-- GitHub Actions verifies both output mobileconfig files are valid plists before committing.
+- GitHub Actions verifies the single mobileconfig is a valid plist with exactly two distinct DNS payloads, checks each payload against its domain lists, and confirms the obsolete enhanced mobileconfig is absent before committing.
 
 ## Metadata
 
@@ -126,8 +141,8 @@ Root `output/metadata.json` uses schema version 4 and records:
 - Selected normal endpoints and the enhanced endpoint after any domain-list override.
 - Normal discovery details, including `profile_domains` counts for sources used directly without probing. Provider-only domains are absent from `target_domains` and `blocked_by`.
 - Original normal discovery count (`target_domains`) and source attribution, plus the published normal count (`published_target_domains`) and domains reassigned by publication policy (`moved_to_enhanced`).
-- Enhanced endpoint targets, additional domains, and merged profile count.
-- Normal and enhanced artifact paths.
+- Enhanced endpoint targets, additional domains, and enhanced DNS payload domain count (the existing `merged_profile_domains` field).
+- Normal and enhanced artifact paths. Both groups' `iOS Profile` entries reference `output/RevokeGuard_Auto-Sync.mobileconfig`.
 
 
 ### Sideloading NexRevokeDNS migration (2026-10-20)

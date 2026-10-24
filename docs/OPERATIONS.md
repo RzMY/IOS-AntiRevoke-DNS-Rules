@@ -6,28 +6,33 @@ The project currently uses the existing `mine` Conda environment:
 
 ```powershell
 conda run -n mine python -m pip install -r requirements-dev.txt
-conda run -n mine python -m pytest -q
+conda run -n mine python -m pytest tests -q
 conda run -n mine python main.py --workers 20
 ```
 
-Local execution writes an unsigned XML plist using the `.mobileconfig` extension. Inspect it with:
+Local execution writes one unsigned XML `.mobileconfig` containing normal and enhanced DNS payloads. Inspect both modes with:
 
 ```powershell
-conda run -n mine python -c "import plistlib; p=plistlib.load(open('output/RevokeGuard_Auto-Sync.mobileconfig','rb')); print(len(p['PayloadContent'][0]['DNSSettings']['SupplementalMatchDomains']))"
+conda run -n mine python -c "import plistlib; p=plistlib.load(open('output/RevokeGuard_Auto-Sync.mobileconfig','rb')); assert len(p['PayloadContent']) == 2; print([(d['PayloadDisplayName'], len(d['DNSSettings']['SupplementalMatchDomains'])) for d in p['PayloadContent']])"
 ```
 
-Inspect enhanced output with:
+Inspect the enhanced extra-domain rules with:
 
 ```powershell
-conda run -n mine python -c "import plistlib; p=plistlib.load(open('output/enhanced/RevokeGuard_Enhanced.mobileconfig','rb')); print(p['PayloadDisplayName']); print(len(p['PayloadContent'][0]['DNSSettings']['SupplementalMatchDomains']))"
 Get-Content output/enhanced/enhanced-domains.txt
 ```
+
+## Installing and switching the profile
+
+See [README: profile usage](../README.md#iosipados-profile-usage--描述文件使用方法) for the full bilingual guide. Download `output/RevokeGuard_Auto-Sync.mobileconfig` in Safari, install it through Settings, then open **Settings → General → VPN & Device Management → DNS**. Select **RevokeGuard Normal - Use during install** for certificate setup, app installation, and the first launch. After a successful first launch, select **RevokeGuard Enhanced - Use after installing** when enhanced protection is needed. Switch back to Normal before installing or re-signing another app; reconnect Wi-Fi or toggle cellular data after each switch.
+
+Remove older standalone RevokeGuard profiles before migrating to this combined profile. Mode switches do not require removing or reinstalling it. Daily repository generation does not update installed match-domain lists automatically: download and install the latest combined profile to refresh them, then verify the selected mode.
 
 ## GitHub Actions
 
 `.github/workflows/daily_update.yml` runs daily at 00:00 UTC and can also be started manually.
 
-No signing secrets are required. The workflow produces unsigned XML `.mobileconfig` files.
+No signing secrets are required. The workflow produces one unsigned XML `.mobileconfig` file.
 
 The Action performs these gates before committing:
 
@@ -35,7 +40,7 @@ The Action performs these gates before committing:
 2. Run the unit test suite.
 3. Run the live discovery pipeline.
 4. Check that every normal and enhanced output is non-empty.
-5. Parse both generated mobileconfig files as plists and verify non-empty target lists.
+5. Parse the combined mobileconfig, verify exactly two DNS payloads and their identifiers, and compare their domains with the published normal and enhanced lists. Verify that the obsolete standalone enhanced profile is absent.
 6. Commit only `output/` changes.
 
 ## Updating an upstream source
@@ -79,12 +84,12 @@ After a successful run, verify:
 
 ```powershell
 git diff -- output/domains.txt output/enhanced/enhanced-domains.txt output/metadata.json
-conda run -n mine python -m pytest -q
+conda run -n mine python -m pytest tests -q
 ```
 
-Large candidate-count changes, all domains becoming targets, or one endpoint reporting mostly negative results should be treated as upstream or parser regressions rather than normal rule updates. Confirm that enhanced proxy files contain only domains absent from `output/domains.txt`, while the enhanced iOS profile contains both sets. Also confirm that provider-owned connectivity domains such as `applejr.net`, `*.novadev.vip`, `khoindvn.com`, and `vuvankhoi.com` do not appear in any generated rule or profile.
+Large candidate-count changes, all domains becoming targets, or one endpoint reporting mostly negative results should be treated as upstream or parser regressions rather than normal rule updates. Confirm that enhanced proxy files contain only domains absent from `output/domains.txt`, while the combined profile's normal DNS payload matches `output/domains.txt` and its enhanced DNS payload contains both sets. Both metadata groups must reference the same profile path, and `output/enhanced/RevokeGuard_Enhanced.mobileconfig` must be absent. Also confirm that provider-owned connectivity domains such as `applejr.net`, `*.novadev.vip`, `khoindvn.com`, and `vuvankhoi.com` do not appear in any generated rule or profile.
 
-When any source discovers `ppq.apple.com`, verify that it appears only in the enhanced proxy files and enhanced iOS profile, never in the normal artifacts. Root metadata preserves raw discovery evidence: `normal_discovery.blocked_by` may contain PPQ, while `moved_to_enhanced` records its reassignment and `published_target_domains` matches the normal output count.
+When any source discovers `ppq.apple.com`, verify that it appears only in the enhanced proxy files and the combined profile's enhanced DNS payload, never in the normal rules or normal DNS payload. Root metadata preserves raw discovery evidence: `normal_discovery.blocked_by` may contain PPQ, while `moved_to_enhanced` records its reassignment and `published_target_domains` matches the normal output count.
 
 ### PPQ classification regression (2026-10-03)
 

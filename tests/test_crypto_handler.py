@@ -136,23 +136,45 @@ def test_create_profile_contains_target_domains(tmp_path: Path):
     ]
 
 
-def test_create_enhanced_profile_has_distinct_display_name(tmp_path: Path):
-    output = tmp_path / "enhanced.plist"
+def test_create_profile_contains_two_selectable_dns_modes(tmp_path: Path):
+    output = tmp_path / "combined.mobileconfig"
     handler = CryptoHandler()
 
-    handler.create_profile(
-        ["ppq.apple.com"],
+    assert handler.create_profile(
+        ["certs.apple.com", "certs.apple.com"],
         output_file=str(output),
         updated_utc="2026-08-30 00:00:00 UTC",
-        profile_name="RevokeGuard Enhanced",
-    )
+        enhanced_domains=["ppq.apple.com", "certs.apple.com"],
+    ) == str(output)
 
     data = plistlib.loads(output.read_bytes())
-    assert data["PayloadDisplayName"] == "RevokeGuard Enhanced 2026-08-30"
-    assert (
-        data["PayloadContent"][0]["PayloadDisplayName"]
-        == "RevokeGuard Enhanced DNS Settings"
-    )
+    assert output.read_bytes().startswith(b"<?xml")
+    assert data["PayloadDisplayName"] == "RevokeGuard 2026-08-30"
+    assert data["PayloadIdentifier"] == "com.revokeGuard"
+    normal, enhanced = data["PayloadContent"]
+    assert normal["PayloadDisplayName"] == "RevokeGuard Normal - Use during install"
+    assert enhanced["PayloadDisplayName"] == "RevokeGuard Enhanced - Use after installing"
+    assert normal["PayloadIdentifier"] == "com.revokeGuard.dns.normal"
+    assert enhanced["PayloadIdentifier"] == "com.revokeGuard.dns.enhanced"
+    assert len({data["PayloadUUID"], normal["PayloadUUID"], enhanced["PayloadUUID"]}) == 3
+    for payload in (normal, enhanced):
+        assert payload["PayloadType"] == "com.apple.dnsSettings.managed"
+        assert payload["DNSSettings"]["DNSProtocol"] == "HTTPS"
+        assert payload["DNSSettings"]["ServerURL"] == "https://reject.rzmy.dpdns.org/dns-query"
+    assert normal["DNSSettings"]["SupplementalMatchDomains"] == ["certs.apple.com"]
+    assert enhanced["DNSSettings"]["SupplementalMatchDomains"] == [
+        "certs.apple.com", "ppq.apple.com",
+    ]
+
+
+def test_combined_profile_rejects_enhanced_list_missing_normal_domains(tmp_path):
+    output = tmp_path / "invalid.mobileconfig"
+    assert CryptoHandler().create_profile(
+        ["certs.apple.com"],
+        output_file=str(output),
+        enhanced_domains=["ppq.apple.com"],
+    ) is None
+    assert not output.exists()
 
 
 def test_build_enhanced_domain_sets_separates_extra_and_merged_domains():

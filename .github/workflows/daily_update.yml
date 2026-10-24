@@ -42,7 +42,7 @@ jobs:
           python -m pip install -r requirements-dev.txt
 
       - name: Run tests
-        run: python -m pytest -q
+        run: python -m pytest tests -q
 
       - name: Run discovery and generation pipeline
         env:
@@ -64,7 +64,7 @@ jobs:
           test -s output/RevokeGuard_hosts.txt
           test -s output/domains.txt
           test -s output/metadata.json
-          test -s output/enhanced/RevokeGuard_Enhanced.mobileconfig
+          test ! -e output/enhanced/RevokeGuard_Enhanced.mobileconfig
           test -s output/enhanced/RevokeGuard_Enhanced_QuantumultX.txt
           test -s output/enhanced/RevokeGuard_Enhanced_Surge.txt
           test -s output/enhanced/RevokeGuard_Enhanced_Loon.txt
@@ -76,15 +76,30 @@ jobs:
           import plistlib
           from pathlib import Path
 
-          for path in (
-              Path("output/RevokeGuard_Auto-Sync.mobileconfig"),
-              Path("output/enhanced/RevokeGuard_Enhanced.mobileconfig"),
-          ):
-              with path.open("rb") as file_handle:
-                  profile = plistlib.load(file_handle)
-              assert profile["PayloadType"] == "Configuration"
-              assert profile["PayloadContent"][0]["DNSSettings"]["SupplementalMatchDomains"]
-          print("Generated mobileconfig files are valid unsigned plists")
+          path = Path("output/RevokeGuard_Auto-Sync.mobileconfig")
+          with path.open("rb") as file_handle:
+              profile = plistlib.load(file_handle)
+          assert profile["PayloadType"] == "Configuration"
+          assert profile["PayloadIdentifier"] == "com.revokeGuard"
+          normal, enhanced = profile["PayloadContent"]
+          for mode, payload in (("normal", normal), ("enhanced", enhanced)):
+              assert payload["PayloadType"] == "com.apple.dnsSettings.managed"
+              assert payload["PayloadIdentifier"] == f"com.revokeGuard.dns.{mode}"
+              assert payload["DNSSettings"]["DNSProtocol"] == "HTTPS"
+              assert payload["DNSSettings"]["ServerURL"].startswith("https://")
+          assert normal["PayloadUUID"] != enhanced["PayloadUUID"]
+          def read_domains(path):
+              return {
+                  line.strip() for line in Path(path).read_text().splitlines()
+                  if line.strip() and not line.startswith("#")
+              }
+          normal_domains = read_domains("output/domains.txt")
+          extra_domains = read_domains("output/enhanced/enhanced-domains.txt")
+          assert normal_domains
+          assert set(normal["DNSSettings"]["SupplementalMatchDomains"]) == normal_domains
+          assert set(enhanced["DNSSettings"]["SupplementalMatchDomains"]) == normal_domains | extra_domains
+          assert "ppq.apple.com" not in normal_domains
+          print("Generated mobileconfig contains valid normal and enhanced DNS payloads")
           PY
 
       - name: Check for output changes
