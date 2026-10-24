@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "timestamp": "2026-10-22T02:14:33.483232Z",
+  "timestamp": "2026-10-24T02:17:57.944478Z",
   "apple_source": {
     "url": "https://support.apple.com/zh-cn/101555",
     "candidate_domains": 133
@@ -154,13 +154,13 @@
       "download_url": "https://sideloading.net/dns/nexrevokedns.mobileconfig",
       "domain_list_url": "https://sideloading.net/dns/denylist.txt",
       "enhanced_domain_list_url": "https://sideloading.net/dns/denylist-ppq.txt",
-      "profile_size": 9060,
+      "profile_size": 9064,
       "discovered_endpoints": [
         {
           "source": "sideloading",
           "url": "https://dns.sideloading.net/dns-query",
-          "payload_identifier": "novadev.nexrevokedns.whileinstalling",
-          "display_name": "NexRevokeDNS - Use when installing apps",
+          "payload_identifier": "nexsideloading.nexrevokedns.duringinstall",
+          "display_name": "Use during install - NexRevokeDNS",
           "domains": [
             "appattest.apple.com",
             "certs.apple.com",
@@ -183,8 +183,8 @@
         {
           "source": "sideloading",
           "url": "https://dns.sideloading.net/ppq/dns-query",
-          "payload_identifier": "novadev.nexrevokedns.afterinstalling",
-          "display_name": "NexRevokeDNS - Use after installing apps",
+          "payload_identifier": "nexsideloading.nexrevokedns.afterinstall",
+          "display_name": "Use after installing - NexRevokeDNS",
           "domains": [
             "appattest.apple.com",
             "certs.apple.com",
@@ -208,8 +208,8 @@
       "selected_endpoint": {
         "source": "sideloading",
         "url": "https://dns.sideloading.net/dns-query",
-        "payload_identifier": "novadev.nexrevokedns.whileinstalling",
-        "display_name": "NexRevokeDNS - Use when installing apps",
+        "payload_identifier": "nexsideloading.nexrevokedns.duringinstall",
+        "display_name": "Use during install - NexRevokeDNS",
         "domains": [
           "appattest.apple.com",
           "certs.apple.com",
@@ -225,8 +225,8 @@
       "enhanced_endpoint": {
         "source": "sideloading",
         "url": "https://dns.sideloading.net/ppq/dns-query",
-        "payload_identifier": "novadev.nexrevokedns.afterinstalling",
-        "display_name": "NexRevokeDNS - Use after installing apps",
+        "payload_identifier": "nexsideloading.nexrevokedns.afterinstall",
+        "display_name": "Use after installing - NexRevokeDNS",
         "domains": [
           "appattest.apple.com",
           "certs.apple.com",
@@ -311,8 +311,8 @@
     {
       "source": "sideloading",
       "url": "https://dns.sideloading.net/dns-query",
-      "payload_identifier": "novadev.nexrevokedns.whileinstalling",
-      "display_name": "NexRevokeDNS - Use when installing apps",
+      "payload_identifier": "nexsideloading.nexrevokedns.duringinstall",
+      "display_name": "Use during install - NexRevokeDNS",
       "domains": [
         "appattest.apple.com",
         "certs.apple.com",
@@ -329,8 +329,8 @@
   "enhanced_dns_endpoint": {
     "source": "sideloading",
     "url": "https://dns.sideloading.net/ppq/dns-query",
-    "payload_identifier": "novadev.nexrevokedns.afterinstalling",
-    "display_name": "NexRevokeDNS - Use after installing apps",
+    "payload_identifier": "nexsideloading.nexrevokedns.afterinstall",
+    "display_name": "Use after installing - NexRevokeDNS",
     "domains": [
       "appattest.apple.com",
       "certs.apple.com",
