@@ -5,7 +5,7 @@
 	<key>ConsentText</key>
 	<dict>
 		<key>default</key>
-		<string>This profile provides protection against revocation and blacklisting.</string>
+		<string>This profile installs Normal and Enhanced DNS options. Select Normal when installing apps or opening them for the first time. Select Enhanced after a successful first launch. Switch back to Normal before installing another app.</string>
 	</dict>
 	<key>PayloadContent</key>
 	<array>
@@ -58,24 +58,90 @@
 					<string>vpp.itunes.apple.com</string>
 				</array>
 			</dict>
+			<key>PayloadDescription</key>
+			<string>Use when installing apps and for their first launch.</string>
 			<key>PayloadDisplayName</key>
-			<string>RevokeGuard DNS Settings</string>
+			<string>RevokeGuard Normal - Use during install</string>
 			<key>PayloadIdentifier</key>
-			<string>com.revokeGuard.dns.8fb786ce-82a7-496a-abea-01c98527ca65</string>
+			<string>com.revokeGuard.dns.normal</string>
 			<key>PayloadType</key>
 			<string>com.apple.dnsSettings.managed</string>
 			<key>PayloadUUID</key>
-			<string>2845eaa8-8df5-41d3-9795-522480c44479</string>
+			<string>5ebb538e-2d81-4573-b5eb-7fd75f4bbb7f</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>DNSSettings</key>
+			<dict>
+				<key>DNSProtocol</key>
+				<string>HTTPS</string>
+				<key>ServerURL</key>
+				<string>https://reject.rzmy.dpdns.org/dns-query</string>
+				<key>SupplementalMatchDomains</key>
+				<array>
+					<string>appattest.apple.com</string>
+					<string>axm-app.apple.com</string>
+					<string>certs.apple.com</string>
+					<string>certs.apple.com.edgekey.net</string>
+					<string>certs.g.aaplimg.com</string>
+					<string>comm-cohort.ess.apple.com</string>
+					<string>comm-main.ess.apple.com</string>
+					<string>crl.apple.com</string>
+					<string>crl.apple.com.akadns.net</string>
+					<string>crl.apple.com.edgekey.net</string>
+					<string>crl.entrust.net</string>
+					<string>crl.g.aaplimg.com</string>
+					<string>crl3.digicert.com</string>
+					<string>crl4.digicert.com</string>
+					<string>gdmf.apple.com</string>
+					<string>guzzoni-apple-com.v.aaplimg.com</string>
+					<string>mesu.apple.com</string>
+					<string>ocsp-a.g.aaplimg.com</string>
+					<string>ocsp-lb.apple.com.akadns.net</string>
+					<string>ocsp.apple.com</string>
+					<string>ocsp.apple.com.edgekey.net</string>
+					<string>ocsp.digicert.cn</string>
+					<string>ocsp.digicert.com</string>
+					<string>ocsp2.apple.com</string>
+					<string>ocsp2.apple.com.edgekey.net</string>
+					<string>ocsp2.apple.com.edgesuite.net</string>
+					<string>ocsp2.g.aaplimg.com</string>
+					<string>ocsp3.apple.com</string>
+					<string>ocsp4.apple.com</string>
+					<string>ppq-ext.apple.com</string>
+					<string>ppq-ext.v.aaplimg.com</string>
+					<string>ppq-st-ext.itunes.apple.com</string>
+					<string>ppq.apple.com</string>
+					<string>use1-ppq-ext-prod.apple.com</string>
+					<string>usw2-ppq-ext-prod.apple.com</string>
+					<string>valid-apple.g.aaplimg.com</string>
+					<string>valid.apple.com</string>
+					<string>valid.apple.com.akadns.net</string>
+					<string>valid.apple.com.edgekey.net</string>
+					<string>vpp.itunes.apple.com</string>
+				</array>
+			</dict>
+			<key>PayloadDescription</key>
+			<string>Use after a successful first launch. Switch to Normal before installing another app.</string>
+			<key>PayloadDisplayName</key>
+			<string>RevokeGuard Enhanced - Use after installing</string>
+			<key>PayloadIdentifier</key>
+			<string>com.revokeGuard.dns.enhanced</string>
+			<key>PayloadType</key>
+			<string>com.apple.dnsSettings.managed</string>
+			<key>PayloadUUID</key>
+			<string>c1d781e3-520b-4fd4-9870-b22ba5a182e9</string>
 			<key>PayloadVersion</key>
 			<integer>1</integer>
 		</dict>
 	</array>
 	<key>PayloadDescription</key>
-	<string>Auto-generated on 2026-10-24 02:17:57 UTC. Blocked Domains: 38. Backend: reject.rzmy.dpdns.org.</string>
+	<string>Auto-generated on 2026-10-25 02:04:57 UTC. Normal: 38 domains; Enhanced: 40 domains. Choose Normal during installation and first launch; choose Enhanced afterwards in Settings &gt; General &gt; VPN &amp; Device Management &gt; DNS. Backend: reject.rzmy.dpdns.org.</string>
 	<key>PayloadDisplayName</key>
-	<string>RevokeGuard 2026-10-24</string>
+	<string>RevokeGuard 2026-10-25</string>
 	<key>PayloadIdentifier</key>
-	<string>com.revokeGuard.326bf667-53b6-49ec-a68a-be6fc196a285</string>
+	<string>com.revokeGuard</string>
 	<key>PayloadOrganization</key>
 	<string>iOS-AntiRevoke-DNS-Rules</string>
 	<key>PayloadRemovalDisallowed</key>
@@ -83,7 +149,7 @@
 	<key>PayloadType</key>
 	<string>Configuration</string>
 	<key>PayloadUUID</key>
-	<string>182e8ccb-a41d-4455-94e1-97840ae83794</string>
+	<string>8b949b1e-eb47-453f-9995-65bbb2fa32b9</string>
 	<key>PayloadVersion</key>
 	<integer>1</integer>
 </dict>

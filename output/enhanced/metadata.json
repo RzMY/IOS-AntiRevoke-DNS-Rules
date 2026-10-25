@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "timestamp": "2026-10-24T02:17:57.944478Z",
+  "timestamp": "2026-10-25T02:04:57.910778Z",
   "dns_endpoint": {
     "source": "sideloading",
     "url": "https://dns.sideloading.net/ppq/dns-query",
@@ -37,6 +37,6 @@
     "Shadowrocket": "output/enhanced/RevokeGuard_Enhanced_Shadowrocket.txt",
     "Hosts": "output/enhanced/RevokeGuard_Enhanced_hosts.txt",
     "Domain List": "output/enhanced/enhanced-domains.txt",
-    "iOS Profile": "output/enhanced/RevokeGuard_Enhanced.mobileconfig"
+    "iOS Profile": "output/RevokeGuard_Auto-Sync.mobileconfig"
   }
 }
