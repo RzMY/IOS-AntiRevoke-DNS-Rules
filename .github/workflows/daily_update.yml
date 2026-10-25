@@ -56,7 +56,8 @@ jobs:
 
       - name: Validate generated artifacts
         run: |
-          test -s output/RevokeGuard_Auto-Sync.mobileconfig
+          test -s output/RevokeGuard.mobileconfig
+          test ! -e output/RevokeGuard_Auto-Sync.mobileconfig
           test -s output/RevokeGuard_QuantumultX.txt
           test -s output/RevokeGuard_Surge.txt
           test -s output/RevokeGuard_Loon.txt
@@ -76,7 +77,7 @@ jobs:
           import plistlib
           from pathlib import Path
 
-          path = Path("output/RevokeGuard_Auto-Sync.mobileconfig")
+          path = Path("output/RevokeGuard.mobileconfig")
           with path.open("rb") as file_handle:
               profile = plistlib.load(file_handle)
           assert profile["PayloadType"] == "Configuration"

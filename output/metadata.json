@@ -574,7 +574,7 @@
       "Shadowrocket": "output/RevokeGuard_Shadowrocket.txt",
       "Hosts": "output/RevokeGuard_hosts.txt",
       "Domain List": "output/domains.txt",
-      "iOS Profile": "output/RevokeGuard_Auto-Sync.mobileconfig"
+      "iOS Profile": "output/RevokeGuard.mobileconfig"
     },
     "enhanced": {
       "Quantumult X": "output/enhanced/RevokeGuard_Enhanced_QuantumultX.txt",
@@ -583,7 +583,7 @@
       "Shadowrocket": "output/enhanced/RevokeGuard_Enhanced_Shadowrocket.txt",
       "Hosts": "output/enhanced/RevokeGuard_Enhanced_hosts.txt",
       "Domain List": "output/enhanced/enhanced-domains.txt",
-      "iOS Profile": "output/RevokeGuard_Auto-Sync.mobileconfig",
+      "iOS Profile": "output/RevokeGuard.mobileconfig",
       "Metadata": "output/enhanced/metadata.json"
     }
   }

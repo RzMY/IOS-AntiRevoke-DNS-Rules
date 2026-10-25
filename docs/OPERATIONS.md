@@ -13,7 +13,7 @@ conda run -n mine python main.py --workers 20
 Local execution writes one unsigned XML `.mobileconfig` containing normal and enhanced DNS payloads. Inspect both modes with:
 
 ```powershell
-conda run -n mine python -c "import plistlib; p=plistlib.load(open('output/RevokeGuard_Auto-Sync.mobileconfig','rb')); assert len(p['PayloadContent']) == 2; print([(d['PayloadDisplayName'], len(d['DNSSettings']['SupplementalMatchDomains'])) for d in p['PayloadContent']])"
+conda run -n mine python -c "import plistlib; p=plistlib.load(open('output/RevokeGuard.mobileconfig','rb')); assert len(p['PayloadContent']) == 2; print([(d['PayloadDisplayName'], len(d['DNSSettings']['SupplementalMatchDomains'])) for d in p['PayloadContent']])"
 ```
 
 Inspect the enhanced extra-domain rules with:
@@ -24,9 +24,9 @@ Get-Content output/enhanced/enhanced-domains.txt
 
 ## Installing and switching the profile
 
-See [README: profile usage](../README.md#iosipados-profile-usage--描述文件使用方法) for the full bilingual guide. Download `output/RevokeGuard_Auto-Sync.mobileconfig` in Safari, install it through Settings, then open **Settings → General → VPN & Device Management → DNS**. Select **RevokeGuard Normal - Use during install** for certificate setup, app installation, and the first launch. After a successful first launch, select **RevokeGuard Enhanced - Use after installing** when enhanced protection is needed. Switch back to Normal before installing or re-signing another app; reconnect Wi-Fi or toggle cellular data after each switch.
+See [README: profile usage](../README.md#iosipados-profile-usage--描述文件使用方法) for the full bilingual guide. Open the [dedicated download link](https://reject.rzmy.dpdns.org/download) in Safari to download `RevokeGuard.mobileconfig`, install it through Settings, then open **Settings → General → VPN & Device Management → DNS**. Select **RevokeGuard Normal - Use during install** for certificate setup, app installation, and the first launch. After a successful first launch, select **RevokeGuard Enhanced - Use after installing** when enhanced protection is needed. Switch back to Normal before installing or re-signing another app; reconnect Wi-Fi or toggle cellular data after each switch.
 
-Remove older standalone RevokeGuard profiles before migrating to this combined profile. Mode switches do not require removing or reinstalling it. Daily repository generation does not update installed match-domain lists automatically: download and install the latest combined profile to refresh them, then verify the selected mode.
+Remove older standalone RevokeGuard profiles before migrating to this combined profile. Mode switches do not require removing or reinstalling it. Daily repository generation does not update installed match-domain lists automatically: download and install the latest combined profile from the [dedicated download link](https://reject.rzmy.dpdns.org/download) to refresh them, then verify the selected mode.
 
 ## GitHub Actions
 

@@ -32,7 +32,7 @@ Apple official host tables
              +---------------+-------------+
                              |
                              v
-       output/RevokeGuard_Auto-Sync.mobileconfig
+       output/RevokeGuard.mobileconfig
        - normal DNS payload: normal domains
        - enhanced DNS payload: normal + extra domains
 ```
@@ -100,7 +100,7 @@ The Sideloading profile now uses the same broad match-domain list for both modes
 
 ## Output contract
 
-`output/` contains the existing normal rule filenames, root metadata, and the single `RevokeGuard_Auto-Sync.mobileconfig`. That profile contains exactly two `com.apple.dnsSettings.managed` payloads:
+`output/` contains the existing normal rule filenames, root metadata, and the single `RevokeGuard.mobileconfig`. Users download this profile through the [dedicated download link](https://reject.rzmy.dpdns.org/download). That profile contains exactly two `com.apple.dnsSettings.managed` payloads:
 
 | Mode | Payload identifier | Display name | Domains |
 | --- | --- | --- | --- |
@@ -142,7 +142,7 @@ Root `output/metadata.json` uses schema version 4 and records:
 - Normal discovery details, including `profile_domains` counts for sources used directly without probing. Provider-only domains are absent from `target_domains` and `blocked_by`.
 - Original normal discovery count (`target_domains`) and source attribution, plus the published normal count (`published_target_domains`) and domains reassigned by publication policy (`moved_to_enhanced`).
 - Enhanced endpoint targets, additional domains, and enhanced DNS payload domain count (the existing `merged_profile_domains` field).
-- Normal and enhanced artifact paths. Both groups' `iOS Profile` entries reference `output/RevokeGuard_Auto-Sync.mobileconfig`.
+- Normal and enhanced artifact paths. Both groups' `iOS Profile` entries reference `output/RevokeGuard.mobileconfig`.
 
 
 ### Sideloading NexRevokeDNS migration (2026-10-20)

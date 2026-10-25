@@ -481,7 +481,7 @@ class AntiRevokeOrchestrator:
             profile_path = self.generate_profile(
                 normal_domains,
                 updated_utc,
-                self.output_dir / "RevokeGuard_Auto-Sync.mobileconfig",
+                self.output_dir / "RevokeGuard.mobileconfig",
                 "RevokeGuard",
                 enhanced_domains=merged_enhanced_domains,
             )
@@ -532,6 +532,9 @@ class AntiRevokeOrchestrator:
                 timestamp,
             )
             # Migrate existing output directories to the single-profile contract.
+            (self.output_dir / "RevokeGuard_Auto-Sync.mobileconfig").unlink(
+                missing_ok=True
+            )
             (self.enhanced_output_dir / "RevokeGuard_Enhanced.mobileconfig").unlink(
                 missing_ok=True
             )
