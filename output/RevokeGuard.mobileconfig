@@ -67,7 +67,7 @@
 			<key>PayloadType</key>
 			<string>com.apple.dnsSettings.managed</string>
 			<key>PayloadUUID</key>
-			<string>dd4c1a2c-c4f2-46fd-a139-7e3c6275a7e8</string>
+			<string>6fadb38d-2da5-4678-b3a8-8731219ecced</string>
 			<key>PayloadVersion</key>
 			<integer>1</integer>
 		</dict>
@@ -131,15 +131,15 @@
 			<key>PayloadType</key>
 			<string>com.apple.dnsSettings.managed</string>
 			<key>PayloadUUID</key>
-			<string>e31d1b6f-d110-491d-9083-eadaa06844d6</string>
+			<string>68d30cbd-36bf-4b39-8b04-dc66e3d121ce</string>
 			<key>PayloadVersion</key>
 			<integer>1</integer>
 		</dict>
 	</array>
 	<key>PayloadDescription</key>
-	<string>Auto-generated on 2026-11-19 04:51:27 UTC. Normal: 38 domains; Enhanced: 40 domains. Choose Normal during installation and first launch; choose Enhanced afterwards in Settings &gt; General &gt; VPN &amp; Device Management &gt; DNS. Backend: reject.rzmy.dpdns.org.</string>
+	<string>Auto-generated on 2026-11-20 04:41:30 UTC. Normal: 38 domains; Enhanced: 40 domains. Choose Normal during installation and first launch; choose Enhanced afterwards in Settings &gt; General &gt; VPN &amp; Device Management &gt; DNS. Backend: reject.rzmy.dpdns.org.</string>
 	<key>PayloadDisplayName</key>
-	<string>RevokeGuard 2026-11-19</string>
+	<string>RevokeGuard 2026-11-20</string>
 	<key>PayloadIdentifier</key>
 	<string>com.revokeGuard</string>
 	<key>PayloadOrganization</key>
@@ -149,7 +149,7 @@
 	<key>PayloadType</key>
 	<string>Configuration</string>
 	<key>PayloadUUID</key>
-	<string>fe5ce241-cf53-406a-9471-4759fa7f11cb</string>
+	<string>163b0f95-d74f-4514-81e6-eb685532d501</string>
 	<key>PayloadVersion</key>
 	<integer>1</integer>
 </dict>
