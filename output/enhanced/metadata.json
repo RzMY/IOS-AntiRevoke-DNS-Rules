@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "timestamp": "2026-11-20T04:41:30.458155Z",
+  "timestamp": "2026-11-21T04:37:04.592622Z",
   "dns_endpoint": {
     "source": "sideloading",
     "url": "https://dns.sideloading.net/ppq/dns-query",
