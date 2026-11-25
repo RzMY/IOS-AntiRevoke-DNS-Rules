@@ -67,9 +67,10 @@ Automatically discovers iOS anti-revoke domains and publishes DNS profiles plus 
 
 ### Note
 
-1. If a normally working application becomes unable to open, remove all sideloaded apps and the trusted certificate, select a new certificate, then repeat the steps above.
-2. It is recommended to use network tools along with profiles to unexpected prevent rule failures caused by changes in network status.
-3. Please enable airplane mode before restarting your phone to prevent unexpected rule failures during system initialization.
+1. If a normally working application becomes unable to open, showing a message like "Internet connection required...", temporarily switch back to **Normal mode** or disable **the enhanced set (network tool)**, and repeatedly tap the app icon until it opens successfully, then switch back to **Enhanced mode**， or re-enable **the enhanced set (network tool)**.
+2. If step 1 does not resolve the issue, uninstall all sideloaded apps and remove any trusted certificates, then select a new certificate and repeat the usage instructions.
+3. It is recommended to use network tools along with profiles to unexpected prevent rule failures caused by changes in network status.
+4. Please enable airplane mode before restarting your phone to prevent unexpected rule failures during system initialization.
 
 ## Credits
 
